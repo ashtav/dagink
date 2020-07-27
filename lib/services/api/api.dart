@@ -19,6 +19,10 @@ _connection({Function then}) async{
 }
 
 class Request {
+
+  static baseUrl(){
+    return baseURL;
+  }
   
   static get(url, {debug: false, authorization: true, Function then, Function error}) async{
     var prefs = await SharedPreferences.getInstance();

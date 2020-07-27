@@ -95,9 +95,9 @@ modal(context, {@required Widget child, bool wrap: false, double radius: 5, doub
   ).then((value){ if(then != null) then(value); });
 }
 
-// ribuan(1500) -> 1.500, ribuan(1300.2), -> 1.300,2
-// ribuan(50, cur: '\$') -> $50, ribuan(1300.50, fixed: 1) -> 1.300,5
-ribuan(number, {String cur, int fixed}){
+// nformat(1500) -> 1.500, nformat(1300.2), -> 1.300,2
+// nformat(50, cur: '\$') -> $50, nformat(1300.50, fixed: 1) -> 1.300,5
+nformat(number, {String cur, int fixed}){
   final nf = new NumberFormat("#,##0", "en_US");
   if(number == null){ return 'null'; }
 
@@ -2213,7 +2213,7 @@ class _SelectGroupState extends State<SelectGroup> {
 }
 
 class TextInput extends StatefulWidget {
-  TextInput({this.label, this.hint, this.controller, this.type, this.action, this.enabled: true, this.obsecure: false, this.submit, this.suffix, this.change, this.node, this.length, this.maxLines});
+  TextInput({this.label, this.hint, this.controller, this.type, this.space: 25, this.action, this.enabled: true, this.obsecure: false, this.submit, this.suffix, this.change, this.node, this.length, this.maxLines});
 
   final String label, hint;
   final TextEditingController controller;
@@ -2224,6 +2224,7 @@ class TextInput extends StatefulWidget {
   final FocusNode node;
   final int length, maxLines;
   final Widget suffix;
+  final double space;
 
   @override
   _TextinputState createState() => _TextinputState();
@@ -2233,7 +2234,7 @@ class _TextinputState extends State<TextInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 25),
+      margin: EdgeInsets.only(bottom: widget.space),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

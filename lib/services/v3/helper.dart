@@ -20,6 +20,8 @@ class Ln {
   static edit() => LineAwesomeIcons.edit;
   static trash() => LineAwesomeIcons.trash;
   static search() => LineAwesomeIcons.search;
+  static bag() => LineAwesomeIcons.shopping_bag;
+  static minus() => LineAwesomeIcons.minus;
 }
 
 class Auth {
