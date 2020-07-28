@@ -1,7 +1,6 @@
+import 'package:dagink/screens/login/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'screens/login/login.dart';
 
 void main() => runApp(MyApp());
 
@@ -36,7 +35,7 @@ class MyApp extends StatelessWidget {
           bodyText2: TextStyle(fontFamily: 'Nunito', fontSize: 15)
         )
       ),
-      home: Login(),
+      home: Authentication(),
     );
   }
 }

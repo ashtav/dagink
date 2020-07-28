@@ -41,18 +41,49 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
   Widget build(BuildContext context) {
     return loading ? ListSkeleton(length: 15) : filter.length == 0 ? Wh.noData(message: 'Anda tidak memiliki transaksi dalam proses\nTap + untuk menambahkan') : 
     
-    ListView.builder(
-      itemCount: filter.length,
-      itemBuilder: (BuildContext context, i){
-        return WidSplash(
-          onTap: (){
-
-          },
-          child: Container(
-            child: text('lorem')
-          ),
-        );
+    RefreshIndicator(
+      onRefresh: () async{
+        getData();
       },
+      child: ListView.builder(
+        itemCount: filter.length,
+        itemBuilder: (BuildContext context, i){
+          var data = filter[i];
+
+          return WidSplash(
+            onTap: (){
+
+            },
+            child: WidSplash(
+              onTap: (){ },
+              padding: EdgeInsets.all(15), color: i % 2 == 0 ? TColor.silver() : Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      text(data['code'], bold: true),
+                      text(dateFormat(data['transaction_date']))
+                    ]
+                  ),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      text(nformat(data['grand_total']), bold: true),
+                    ]
+                  ),
+
+                ],
+              )
+              
+            ),
+          );
+        },
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dagink/screens/dashboard/home/home.dart';
+import 'package:dagink/screens/dashboard/others/others.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase.dart';
 import 'package:dagink/screens/dashboard/store/store.dart';
 import 'package:dagink/services/v2/helper.dart';
@@ -26,6 +27,10 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+
+    Timer(Duration(milliseconds: 300), (){
+      statusBar(color: Colors.transparent, darkText: true);
+    });
 
     controller = new TabController(vsync: this, length: 5);
     controller.index = widget.tabIndex;
@@ -104,7 +109,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                             case 1: return Store(context); break;
                             case 2: return Home(context); break;
                             case 3: return Purchase(context); break;
-                            default: return Home(context); break;
+                            default: return Others(context); break;
                           }
                         },
                         settings: settings,
@@ -159,11 +164,12 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
           child: new TabBar(
             onTap: (int i) async{
               setState(() { pageIndex = i; });
+              statusBar(color: Colors.transparent, darkText: true);
 
-              switch (i) {
-                case 0: statusBar(color: Colors.transparent, darkText: false); break;
-                default: statusBar(color: Colors.transparent, darkText: true); break;
-              }
+              // switch (i) {
+              //   case 0: statusBar(color: Colors.transparent, darkText: false); break;
+              //   default: statusBar(color: Colors.transparent, darkText: true); break;
+              // }
 
             },
             indicatorColor: Colors.white,

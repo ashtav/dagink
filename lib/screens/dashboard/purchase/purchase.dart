@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:dagink/screens/dashboard/purchase/cart.dart';
 import 'package:dagink/screens/dashboard/purchase/forms/form-purchase.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase-history.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase-order.dart';
@@ -43,14 +46,44 @@ class _PurchaseState extends State<Purchase> {
     });
   }
 
+  Widget tabContent = PurchaseOrder();
+
+  @override
+  void initState() {
+    super.initState(); tabContent = tab == 0 ? PurchaseOrder() : PurchaseHistory();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Wh.appBar(context, title: 'Pembelian', elevation: 0, actions: [
+        // IconButton(
+        //   icon: loading ? Wh.spiner() : Icon(Ln.refresh()),
+        //   onPressed: loading ? null : (){
+        //     getData();
+        //   },
+        // ),
+
         IconButton(
-          icon: loading ? Wh.spiner() : Icon(Ln.refresh()),
-          onPressed: loading ? null : (){
-            getData();
+          icon: Stack(
+            children: [
+              Icon(Ln.cart()),
+
+              Positioned(
+                child: Container(
+                  width: 10, height: 10,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.red
+                  ),
+                ),
+              )
+
+            ]
+          ),
+          
+          onPressed: (){
+            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Cart(widget.ctx)));
           },
         ),
       ]),
@@ -70,6 +103,8 @@ class _PurchaseState extends State<Purchase> {
                     onTap: (){
                       setState(() {
                         tab = i;
+
+                        tabContent = tab == 0 ? PurchaseOrder() : PurchaseHistory();
                       });
                     },
                     child: AnimatedContainer(
@@ -92,7 +127,7 @@ class _PurchaseState extends State<Purchase> {
             ),
 
             Expanded(
-              child: tab == 0 ? PurchaseOrder() : PurchaseHistory()
+              child: tabContent
             )
           ]
         ),
@@ -104,7 +139,15 @@ class _PurchaseState extends State<Purchase> {
         onPressed: (){
           Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormPurchase(widget.ctx))).then((value){
             if(value != null){
-              getData();
+              if(value['added'] != null){
+                tabContent = SizedBox.shrink();
+
+                Timer(Duration(milliseconds: 300), (){
+                  setState(() {
+                    tabContent = PurchaseOrder();
+                  });
+                });
+              }
             }
           });
         },

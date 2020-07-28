@@ -1,3 +1,4 @@
+import 'package:dagink/screens/dashboard/purchase/forms/save-purchase.dart';
 import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
@@ -34,6 +35,18 @@ class _FormPurchaseState extends State<FormPurchase> {
     });
   }
 
+  List selected = [];
+  double total = 0;
+
+  initFooter(){
+    total = 0;
+
+    for (var i = 0; i < selected.length; i++) {
+      var o = selected[i];
+      total += (int.parse(o['qty']) + (int.parse(o['qty_pcs']) / o['volume'])) * o['price'];
+    }
+  }
+
   @override
   void initState() {
     super.initState(); getData();
@@ -43,86 +56,193 @@ class _FormPurchaseState extends State<FormPurchase> {
   Widget build(BuildContext context) {
     return Unfocus(
       child: Scaffold(
+        backgroundColor: TColor.silver(),
         appBar: Wh.appBar(context, title: Fc.search(
           hint: 'Ketik nama item',
-          length: 50, submit: (String s){ Navigator.pop(context, s); },
+          length: 50, change: (String s){
+            var k = s.toLowerCase();
+
+            setState(() {
+              filter = products.where((item) => item['name'].toString().toLowerCase().contains(k)).toList();
+            });
+          },
           action: TextInputAction.go,
         ),),
 
         body: loading ? ListSkeleton(length: 15) : filter.length == 0 ? Wh.noData(message: 'Tidak ada data product\nCoba refresh kembali') :
 
-          Column(
+          Stack(
             children: [
 
-              Expanded(
-                child:  ListView.builder(
-                  itemCount: filter.length,
-                  itemBuilder: (BuildContext context, i){
-                    var data = filter[i];
-
-                    return WidSplash(
-                      padding: EdgeInsets.all(15),
-                      color: i % 2 == 0 ? TColor.silver() : Colors.white,
-                      onTap: (){
-                        modal(widget.ctx, wrap: true, child: ItemSelection(data: data));
+              Column(
+                children: [
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        getData();
                       },
-                      child: Container(
-                        child: Row(
-                          children: <Widget>[
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(bottom: 70),
+                        itemCount: filter.length,
+                        itemBuilder: (BuildContext context, i){
+                          var data = filter[i];
 
-                            data['image'] == 'default.png' ?
+                          int index = selected.indexWhere((item) => item['product_id'] == data['id']);
 
-                            Container(
-                              margin: EdgeInsets.only(right: 10),
-                              width: 50, height: 50,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage('assets/img/no-img.png')
-                                )
-                              ),
-                            ) :
+                          return WidSplash(
+                            padding: EdgeInsets.all(15),
+                            color: i % 2 == 0 ? TColor.silver() : Colors.white,
+                            onTap: (){
 
-                            Container(
-                              margin: EdgeInsets.only(right: 10),
-                              child: FadeInImage.assetNetwork(
-                                height: 50, width: 50,
-                                placeholder: 'assets/img/no-img.png',
-                                image: Request.baseUrl()+'/product_image/'+data['image'],
-                              ),
-                            ),
+                              modal(widget.ctx, wrap: true, child: ItemSelection(data: data, initData: index > -1 ? selected[index] : null), then: (res){
+                                if(res != null){
+                                  int io = selected.indexWhere((item) => item['product_id'] == res['item']['product_id']);
 
-                            Flexible(
+                                  if(res['remove'] != null){
+                                    setState(() => selected.removeAt(io) );
+                                  }else{
+                                    setState(() {
+                                      if( io > -1 ){
+                                        selected[io] = res['item'];
+                                      }else{
+                                        selected.add(res['item']);
+                                      }
+                                    });
+                                  }
+
+                                  initFooter();
+                                }
+                              });
+                            },
+                            child: Container(
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
 
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      text(ucwords(data['name']), bold: true),
-                                      text(data['description'])
-                                    ],
-                                  ),
+                                  data['image'] == 'default.png' ?
 
                                   Container(
-                                    margin: EdgeInsets.only(left: 15),
-                                    child: text(nformat(data['price']), bold: true)
+                                    margin: EdgeInsets.only(right: 10),
+                                    width: 50, height: 50,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage('assets/img/no-img.png')
+                                      )
+                                    ),
+                                  ) :
+
+                                  Container(
+                                    margin: EdgeInsets.only(right: 10),
+                                    child: FadeInImage.assetNetwork(
+                                      height: 50, width: 50,
+                                      placeholder: 'assets/img/no-img.png',
+                                      image: Request.baseUrl()+'/product_image/'+data['image'],
+                                    ),
+                                  ),
+
+                                  Flexible(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+
+                                        Flexible(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              text(ucwords(data['name']), bold: true, overflow: TextOverflow.ellipsis),
+                                              text(data['description'])
+                                            ],
+                                          ),
+                                        ),
+
+                                        Container(
+                                          margin: EdgeInsets.only(left: 15),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: <Widget>[
+                                              text(nformat(data['price']), bold: true),
+                                              index > -1 ? ZoomIn(child: text(selected[index]['qty']+'/'+selected[index]['qty_pcs'], color: Colors.green, bold: true)) : SizedBox.shrink()
+                                            ],
+                                          )
+                                        )
+                                      ],
+                                    ),
                                   )
+
+                                  
                                 ],
                               ),
-                            )
-
-                            
-                          ],
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ),
+                ]
+              ),
+
+              Positioned(
+                bottom: 0,
+                child: selected.length == 0 ? SizedBox.shrink() : SlideUp(
+                  child: Container(
+                    width: Mquery.width(context),
+                    padding: EdgeInsets.all(15),
+                    child: WidSplash(
+                       onTap: (){
+
+                        Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => SavePurchase(widget.ctx, data: selected))).then((value){
+                          if(value != null){
+                            if(value['added'] != null){
+                              Wh.toast('Barang berhasil disimpan');
+                              Navigator.pop(context, {'added': true});
+                            }
+                          }
+                        });
+
+                      },
+                      color: TColor.azure(), radius: BorderRadius.circular(3),
+                      child: Container(
+                        padding: EdgeInsets.only(left: 15, right: 15, top: 7, bottom: 7),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3)
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                text(selected.length.toString()+' barang  |  '+nformat(total.toString(), fixed: 0), color: Colors.white, bold: true),
+                                text('Tap untuk menyelesaikan', color: Colors.white, size: 13)
+                              ]
+                            ),
+
+                            Icon(Ln.bag(), color: Colors.white,)
+
+                          ],
+                        )
+                        
+                        
+                      ),
+                    )
+                  ),
                 ),
               )
             ]
           ),
+
+        // floatingActionButton: selected.length == 0 ? null : FloatingActionButton(
+        //   heroTag: 'form-purchase',
+        //   child: Icon(Ln.check()),
+        //   onPressed: (){
+        //     Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => SavePurchase(widget.ctx, data: selected))).then((value){
+        //       if(value != null){
+                
+        //       }
+        //     });
+        //   },
+        // ),
         
       ),
     );
@@ -130,9 +250,9 @@ class _FormPurchaseState extends State<FormPurchase> {
 }
 
 class ItemSelection extends StatefulWidget {
-  ItemSelection({this.data});
+  ItemSelection({this.data, this.initData});
 
-  final data;
+  final data, initData;
 
   @override
   _ItemSelectionState createState() => _ItemSelectionState();
@@ -143,6 +263,41 @@ class _ItemSelectionState extends State<ItemSelection> {
 
   var qty = TextEditingController(text: '0'),
       pcs = TextEditingController(text: '0');
+
+  
+  _add({TextEditingController controller}){
+    var c = controller;
+
+    if(c.text == ''){
+      controller.text = '0';
+    }else{
+      controller.text = (int.parse(c.text) + 1).toString();
+    }
+  }
+
+  _min({TextEditingController controller}){
+    var c = controller;
+
+    if(c.text == '' || c.text == '0'){
+      controller.text = '0';
+    }else{
+      controller.text = (int.parse(c.text) - 1).toString();
+    }
+  }
+
+  initInput(){
+    if(widget.initData != null){
+      var data = widget.initData;
+
+      qty.text = data['qty'];
+      pcs.text = data['qty_pcs'];
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState(); initInput();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,12 +343,14 @@ class _ItemSelectionState extends State<ItemSelection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            text(ucwords(widget.data['name']), bold: true),
-                            text(widget.data['description'])
-                          ],
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              text(ucwords(widget.data['name']), bold: true, overflow: TextOverflow.ellipsis),
+                              text(widget.data['description'])
+                            ],
+                          ),
                         ),
 
                         Container(
@@ -216,21 +373,21 @@ class _ItemSelectionState extends State<ItemSelection> {
 
                   Expanded(
                     child: TextInput(
-                      hint: 'Jumlah dus', controller: qty, type: TextInputType.datetime, length: 11, space: 0,
+                      hint: 'Jumlah dus', controller: qty, enabled: false, type: TextInputType.datetime, length: 11, space: 0, prefix: Container(child: text('QTY'), margin: EdgeInsets.only(right: 10),),
                     ),
                   ),
 
                   Container(
                     margin: EdgeInsets.only(left: 11),
                     child: WidSplash(
-                      onTap: (){ },
+                      onTap: (){ _min(controller: qty); },
                       child: Icon(Ln.minus()), radius: BorderRadius.circular(50),
                       padding: EdgeInsets.all(11),
                     ),
                   ),
 
                   WidSplash(
-                    onTap: (){ },
+                    onTap: (){ _add(controller: qty); },
                     child: Icon(Ln.plus()), radius: BorderRadius.circular(50),
                     padding: EdgeInsets.all(11),
                   )
@@ -246,21 +403,21 @@ class _ItemSelectionState extends State<ItemSelection> {
 
                   Expanded(
                     child: TextInput(
-                      hint: 'Jumlah pcs', controller: qty, type: TextInputType.datetime, length: 11, space: 0,
+                      hint: 'Jumlah pcs', controller: pcs, enabled: false, type: TextInputType.datetime, length: 11, space: 0, prefix: Container(child: text('PCS'), margin: EdgeInsets.only(right: 10),)
                     ),
                   ),
 
                   Container(
                     margin: EdgeInsets.only(left: 11),
                     child: WidSplash(
-                      onTap: (){ },
+                      onTap: (){ _min(controller: pcs); },
                       child: Icon(Ln.minus()), radius: BorderRadius.circular(50),
                       padding: EdgeInsets.all(11),
                     ),
                   ),
 
                   WidSplash(
-                    onTap: (){ },
+                    onTap: (){ _add(controller: pcs); },
                     child: Icon(Ln.plus()), radius: BorderRadius.circular(50),
                     padding: EdgeInsets.all(11),
                   )
@@ -271,7 +428,8 @@ class _ItemSelectionState extends State<ItemSelection> {
 
             Row(
               children: <Widget>[
-
+                
+                widget.initData != null ?
                 Container(
                   margin: EdgeInsets.only(right: 15),
                   decoration: BoxDecoration(
@@ -280,22 +438,28 @@ class _ItemSelectionState extends State<ItemSelection> {
                   ),
                   child: WidSplash(
                     padding: EdgeInsets.all(9),
-                    onTap: (){ },
+                    onTap: (){
+                      Navigator.pop(context, {'remove': true, 'item': {'product_id': widget.data['id']}});
+                    },
                     child: Icon(Ln.trash(), color: Colors.redAccent), radius: BorderRadius.circular(3),
                   ),
-                ),
+                ) : SizedBox.shrink(),
 
                 Expanded(
                   child: Button(
-                    onTap: (){ },
-                    text: 'Tambahkan Ke Keranjang',
+                    onTap: (){
+                      if(qty.text == '0' && pcs.text == '0'){
+                        Wh.toast('Inputkan jumlah pembelian');
+                      }else{
+                        Navigator.pop(context, {'item': {'product_id': widget.data['id'], 'qty': qty.text, 'qty_pcs': pcs.text, 'name': widget.data['name'], 'price': widget.data['price'], 'volume': widget.data['volume']}});
+                      }
+                    },
+                    text: 'OK',
                   ),
                 ),
 
               ],
             )
-
-            
 
           ],
         ),

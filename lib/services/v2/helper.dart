@@ -2213,7 +2213,7 @@ class _SelectGroupState extends State<SelectGroup> {
 }
 
 class TextInput extends StatefulWidget {
-  TextInput({this.label, this.hint, this.controller, this.type, this.space: 25, this.action, this.enabled: true, this.obsecure: false, this.submit, this.suffix, this.change, this.node, this.length, this.maxLines});
+  TextInput({this.label, this.hint, this.controller, this.type, this.space: 25, this.action, this.enabled: true, this.obsecure: false, this.submit, this.prefix, this.suffix, this.change, this.node, this.length, this.maxLines});
 
   final String label, hint;
   final TextEditingController controller;
@@ -2223,7 +2223,7 @@ class TextInput extends StatefulWidget {
   final Function submit, change;
   final FocusNode node;
   final int length, maxLines;
-  final Widget suffix;
+  final Widget suffix, prefix;
   final double space;
 
   @override
@@ -2258,6 +2258,7 @@ class _TextinputState extends State<TextInput> {
               onChanged: widget.change,
               inputFormatters: [ LengthLimitingTextInputFormatter(widget.length) ],
               decoration: InputDecoration(
+                prefix: widget.prefix,
                 isDense: true, suffixIcon: widget.suffix, suffixStyle: TextStyle(),
                 contentPadding: EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
                 hintText: widget.hint,
@@ -2484,11 +2485,13 @@ class _ListSkeletonState extends State<ListSkeleton> {
 }
 
 class Button extends StatefulWidget {
-  Button({this.text, this.onTap, this.isSubmit: false});
+  Button({this.text, this.onTap, this.isSubmit: false, this.color, this.textColor, this.border, this.spinColor});
 
   final String text;
   final bool isSubmit;
   final Function onTap;
+  final Color color, textColor, spinColor;
+  final BoxBorder border;
 
   @override
   _ButtonState createState() => _ButtonState();
@@ -2499,11 +2502,12 @@ class _ButtonState extends State<Button> {
   Widget build(BuildContext context) {
     return WidSplash(
       onTap: widget.onTap, radius: BorderRadius.circular(2),
-      color: TColor.azure(o: widget.isSubmit ? .5 : 1),
+      color: widget.color == null ? TColor.azure(o: widget.isSubmit ? .5 : 1) : widget.color,
+      border: widget.color == null ? widget.border : Border.all(color: Colors.black12),
       child: Container(
         width: Mquery.width(context),
         padding: EdgeInsets.all(11),
-        child: widget.isSubmit ? Wh.spiner(color: Colors.white, size: 18) : text(widget.text, align: TextAlign.center, color: Colors.white),
+        child: widget.isSubmit ? Wh.spiner(color: widget.spinColor == null ? Colors.white : widget.spinColor, size: 18) : text(widget.text, align: TextAlign.center, color: widget.textColor == null ? Colors.white : widget.textColor),
       ),
     );
   }

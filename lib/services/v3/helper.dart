@@ -22,6 +22,15 @@ class Ln {
   static search() => LineAwesomeIcons.search;
   static bag() => LineAwesomeIcons.shopping_bag;
   static minus() => LineAwesomeIcons.minus;
+  static check() => LineAwesomeIcons.check;
+  static cart() => LineAwesomeIcons.shopping_cart_arrow_down;
+  static user() => LineAwesomeIcons.user;
+  static users() => LineAwesomeIcons.users;
+  static userSetting() => LineAwesomeIcons.user_lock;
+  static infoCircle() => LineAwesomeIcons.info_circle;
+  static question() => LineAwesomeIcons.question_circle;
+  static signout() => LineAwesomeIcons.alternate_sign_out;
+  static star() => LineAwesomeIcons.star;
 }
 
 class Auth {
@@ -39,6 +48,18 @@ class Auth {
 
   static Future id() async{
     return await user(field: 'id');
+  }
+
+  static Future token() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+}
+
+class LocalData {
+  static Future get(key) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
   }
 }
 

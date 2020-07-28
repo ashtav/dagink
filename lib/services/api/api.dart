@@ -39,7 +39,7 @@ class Request {
 
         try {
           http.get(api(url), headers: !authorization ? {} : {
-            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json'
+            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json', 'Content-Type': 'application/json'
           }).then((res){
             if(debug){
               print('# request : '+res.request.toString());
@@ -82,7 +82,7 @@ class Request {
 
         try {
           http.post(api(url), body: formData == null ? {} : formData, headers: !authorization ? {} : {
-            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json'
+            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json', 'Content-Type': 'application/json'
           }).then((res){
             if(debug){
               print('# request : '+res.request.toString());
@@ -125,7 +125,7 @@ class Request {
 
         try {
           http.put(api(url), body: formData, headers: !authorization ? {} : {
-            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json'
+            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json', 'Content-Type': 'application/json'
           }).then((res){
             if(debug){
               print('# request : '+res.request.toString());
@@ -167,7 +167,7 @@ class Request {
 
         try {
           http.delete(api(url), headers: !authorization ? {} : {
-            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json'
+            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json', 'Content-Type': 'application/json'
           }).then((res){
             if(debug){
               print('# request : '+res.request.toString());
