@@ -1,4 +1,3 @@
-import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +39,7 @@ class _FormStoreState extends State<FormStore> {
       request = true;
     });
 
-    Request.get('location/regency', then: (_, data){
+    Http.get('location/regency', then: (_, data){
       setState((){
         request = false;
 
@@ -71,7 +70,7 @@ class _FormStoreState extends State<FormStore> {
       districts = urbans = [];
     });
 
-    Request.get('location/district/'+id, then: (_, data){
+    Http.get('location/district/'+id, then: (_, data){
       var res = decode(data)['data'];
       districts = res;
       setState(() => request = false );
@@ -88,7 +87,7 @@ class _FormStoreState extends State<FormStore> {
       urbans = [];
     });
 
-    Request.get('location/urban_village/'+id, then: (_, data){
+    Http.get('location/urban_village/'+id, then: (_, data){
       var res = decode(data)['data'];
       urbans = res;
       setState(() => request = false );
@@ -119,7 +118,7 @@ class _FormStoreState extends State<FormStore> {
     };
 
     if(widget.initData == null){
-      Request.post('store', formData: formData, then: (_, data){
+      Http.post('store', data: formData, then: (_, data){
         Wh.toast('Berhasil ditambahkan');
         Navigator.pop(context, {'added': true});
       }, error: (err){
@@ -129,7 +128,7 @@ class _FormStoreState extends State<FormStore> {
     }else{
       formData['code'] = widget.initData['code'];
 
-      Request.put('store/'+widget.initData['id'].toString(), formData: formData, then: (_, data){
+      Http.put('store/'+widget.initData['id'].toString(), data: formData, then: (_, data){
         Wh.toast('Berhasil diperbarui');
         Navigator.pop(context, {'updated': true, 'data': formData});
       }, error: (err){

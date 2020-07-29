@@ -1,7 +1,7 @@
 import 'package:dagink/screens/dashboard/dashboard.dart';
 import 'package:dagink/screens/login/forget-password.dart';
-import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
+import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -23,14 +23,10 @@ class _LoginState extends State<Login> {
     if(email.text.isEmpty || password.text.isEmpty){
       focus(context, email.text.isEmpty ? emailNode : passNode);
     }else{
-      setState(() {
-        isSubmit = true;
-      });
+      setState(() => isSubmit = true );
 
-      Request.post('login', formData: {'email': email.text, 'password': password.text}, then: (_, data){
-        setState(() {
-          isSubmit = false;
-        });
+      Http.post('login', data: {'email': email.text, 'password': password.text}, authorization: false, then: (_, data){
+        setState(() => isSubmit = false );
 
         var res = decode(data),
             user = res['data'],
@@ -43,9 +39,7 @@ class _LoginState extends State<Login> {
 
       }, error: (err){
         onError(context, response: err);
-        setState(() {
-          isSubmit = false;
-        });
+        setState(() => isSubmit = false );
       });
     }
   }

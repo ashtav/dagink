@@ -1,12 +1,6 @@
-import 'dart:io';
-
-import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-// import 'package:dio/dio.dart';
-import 'package:http/http.dart' as http;
 
 class SavePurchase extends StatefulWidget {
   SavePurchase(this.ctx, {this.data});
@@ -20,94 +14,67 @@ class SavePurchase extends StatefulWidget {
 class _SavePurchaseState extends State<SavePurchase> {
 
   bool isSubmit = false, isSave = false;
-  int total = 0;
+  double total = 0.0;
 
-  submit({bool statusInput: false}){
-
-  }
-
-  save() async{
-
+  submit(){
     setState(() {
-      isSave = true;
+      isSubmit = true;
     });
-
-    // Uri uri = Uri.parse('https://daging-dev.bukakode.com/purchase');
-    // http.MultipartRequest request = new http.MultipartRequest('POST', uri);
 
     List formData = [];
 
     for (var i = 0; i < widget.data.length; i++) {
       var data = widget.data[i];
 
-      // formData.append('items['+i.toString()+'].product_id', data['product_id']);
-      // formData.append('items['+i.toString()+'].qty', data['qty']);
-      // formData.append('items['+i.toString()+'].qty_pcs', data['qty_pcs']);
       formData.add({
         'product_id': data['product_id'].toString(),
         'qty': data['qty'].toString(),
         'qty_pcs': data['qty_pcs'].toString()
       });
-
-      // request.fields['items['+i.toString()+'].product_id'] = data['product_id'].toString();
-      // request.fields['items['+i.toString()+'].qty'] = data['qty'].toString();
-      // request.fields['items['+i.toString()+'].qty_pcs'] = data['qty_pcs'].toString();
     }
 
-    // print(request.fields);
+    var _data = {'items': formData};
 
-    
-
-    // var data = encode({'name': 'sdfsf', 'email': 'sfsdf'});
-
-    // print(encode(formData));
-
-    // String token = await Auth.token();
-
-    // Map<String, String> headers = { HttpHeaders.authorizationHeader : token, 'Accept': 'application/json'};
-
-    // request.headers.addAll(headers);
-
-    // http.StreamedResponse response = await request.send();
-    // print(response.statusCode);
-    // print(response.headers);
-    // print(response.stream); 'items' = [{}]
-
-    var _data = {'items': formData}; print(encode(_data));
-
-
-    // try {
-    //   http.post('https://daging-dev.bukakode.com/purchase', body: encode(_data), headers: { HttpHeaders.authorizationHeader: token, 'Content-Type': 'application/json'}).then((res){
-
-    //     // if(res.statusCode != 200 && res.statusCode != 201){
-    //     //   var response = {'status': res.statusCode, 'body': decode(res.body)};
-          
-    //     // }else{
-          
-    //     // }
-
-    //     print(res.body);
-
-    //   });
-    // } catch (e) {
-    //   if(e is PlatformException) {
-    //     Wh.toast(e.message);
-    //   }
-    // }
-
-    // setState(() => isSave = false );
-
-
-    
-
-
-
-    Request.post('purchase', formData: encode(_data), debug: true, then: (_, data){
-      setState(() => isSave = false );
+    Http.post('purchase', data: encode(_data), debug: true, header: {'Content-Type': 'application/json'}, then: (_, data){
+      setState(() => isSubmit = false );
       Navigator.pop(context, {'added': true});
     }, error: (err){
-      setState(() => isSave = false );
+      setState(() => isSubmit = false );
       onError(context, response: err);
+    });
+  }
+
+  save() async{
+    var data = widget.data; // data baru
+
+    getPrefs('order', dec: true).then((res){
+      if(res != null){
+
+        var order = res; // data lama
+
+        for (var item in data) {
+          // tambahkan data baru ke data lama
+          int io = order.indexWhere((i) => i['product_id'] == item['product_id']); // periksa item
+
+          if(io > -1){ // jika ada, update
+            var qty = order[io]['qty'], pcs = order[io]['qty_pcs'];
+
+            qty += item['qty'];
+            pcs += item['qty_pcs'];
+
+            order[io]['qty'] = qty;
+            order[io]['qty_pcs'] = pcs;
+          }else{
+            order.add(item);
+          }
+        }
+
+        setPrefs('order', order, enc: true);
+      }else{
+        setPrefs('order', data, enc: true);
+      }
+
+      Navigator.pop(context, {'addedToCart': true});
     });
   }
 
@@ -115,7 +82,8 @@ class _SavePurchaseState extends State<SavePurchase> {
     var data = widget.data;
 
     for (var i = 0; i < data.length; i++) {
-      total += data[i]['price'];
+      var o = data[i];
+      total += (o['qty'] + (o['qty_pcs'] / o['volume'])) * o['price'];
     }
   }
 
@@ -181,7 +149,7 @@ class _SavePurchaseState extends State<SavePurchase> {
 
                                   Container(
                                     margin: EdgeInsets.only(left: 20),
-                                    child: text(data['qty']+'/'+data['qty_pcs'], bold: true)
+                                    child: text(data['qty'].toString()+'/'+data['qty_pcs'].toString(), bold: true)
                                   )
                                 ],
                               )
@@ -202,7 +170,7 @@ class _SavePurchaseState extends State<SavePurchase> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   text('TOTAL PEMBAYARAN'),
-                  text('Rp '+ nformat(total.toString()), bold: true),
+                  text('Rp '+ nformat(total.toString(), fixed: 0), bold: true),
                 ],
               )
             ),
@@ -213,7 +181,7 @@ class _SavePurchaseState extends State<SavePurchase> {
                 children: [
 
                   Button(
-                    onTap: isSubmit ? null : (){ submit(); },
+                    onTap: isSubmit || isSave ? null : (){ submit(); },
                     text: 'Order Sekarang', isSubmit: isSubmit,
                   ),
 
@@ -221,7 +189,7 @@ class _SavePurchaseState extends State<SavePurchase> {
                     margin: EdgeInsets.only(top: 10),
                     child: Button(
                       color: Color.fromRGBO(255, 255, 255, isSave ? .5 : 1), textColor: Colors.black87,
-                      onTap: isSave ? null : (){ save(); },
+                      onTap: isSave || isSubmit ? null : (){ save(); },
                       text: 'Simpan', isSubmit: isSave, spinColor: TColor.azure(),
                     )
                     

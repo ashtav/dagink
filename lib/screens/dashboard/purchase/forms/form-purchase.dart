@@ -1,5 +1,4 @@
 import 'package:dagink/screens/dashboard/purchase/forms/save-purchase.dart';
-import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,7 @@ class _FormPurchaseState extends State<FormPurchase> {
       loading = true;
     });
 
-    Request.get('product', then: (_, data){
+    Http.get('product', then: (_, data){
       Map res = decode(data);
       products = filter = res['data']; print(res);
 
@@ -36,14 +35,16 @@ class _FormPurchaseState extends State<FormPurchase> {
   }
 
   List selected = [];
-  double total = 0;
+  double total = 0, totalQty = 0, totalPcs = 0;
 
   initFooter(){
-    total = 0;
+    total = 0; totalQty = 0; totalPcs = 0;
 
     for (var i = 0; i < selected.length; i++) {
       var o = selected[i];
-      total += (int.parse(o['qty']) + (int.parse(o['qty_pcs']) / o['volume'])) * o['price'];
+      total += (o['qty'] + (o['qty_pcs'] / o['volume'])) * o['price'];
+      totalQty += o['qty'];
+      totalPcs += o['qty_pcs'];
     }
   }
 
@@ -135,7 +136,7 @@ class _FormPurchaseState extends State<FormPurchase> {
                                     child: FadeInImage.assetNetwork(
                                       height: 50, width: 50,
                                       placeholder: 'assets/img/no-img.png',
-                                      image: Request.baseUrl()+'/product_image/'+data['image'],
+                                      image: Http.baseUrl(url: 'product_image/'+data['image']),
                                     ),
                                   ),
 
@@ -161,7 +162,7 @@ class _FormPurchaseState extends State<FormPurchase> {
                                             crossAxisAlignment: CrossAxisAlignment.end,
                                             children: <Widget>[
                                               text(nformat(data['price']), bold: true),
-                                              index > -1 ? ZoomIn(child: text(selected[index]['qty']+'/'+selected[index]['qty_pcs'], color: Colors.green, bold: true)) : SizedBox.shrink()
+                                              index > -1 ? ZoomIn(child: text(selected[index]['qty'].toString()+'/'+selected[index]['qty_pcs'].toString(), color: Colors.green, bold: true)) : SizedBox.shrink()
                                             ],
                                           )
                                         )
@@ -192,8 +193,10 @@ class _FormPurchaseState extends State<FormPurchase> {
 
                         Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => SavePurchase(widget.ctx, data: selected))).then((value){
                           if(value != null){
-                            if(value['added'] != null){
-                              Wh.toast('Barang berhasil disimpan');
+                            if(value['addedToCart'] != null){
+                              Wh.toast('Disimpan ke keranjang');
+                              Navigator.pop(context, {'addedToCart': true});
+                            }else if(value['added'] != null){
                               Navigator.pop(context, {'added': true});
                             }
                           }
@@ -213,7 +216,7 @@ class _FormPurchaseState extends State<FormPurchase> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                text(selected.length.toString()+' barang  |  '+nformat(total.toString(), fixed: 0), color: Colors.white, bold: true),
+                                text(totalQty.toInt().toString()+' / '+totalPcs.toInt().toString()+'  |  '+nformat(total.toString(), fixed: 0), color: Colors.white, bold: true),
                                 text('Tap untuk menyelesaikan', color: Colors.white, size: 13)
                               ]
                             ),
@@ -289,8 +292,8 @@ class _ItemSelectionState extends State<ItemSelection> {
     if(widget.initData != null){
       var data = widget.initData;
 
-      qty.text = data['qty'];
-      pcs.text = data['qty_pcs'];
+      qty.text = data['qty'].toString();
+      pcs.text = data['qty_pcs'].toString();
     }
   }
 
@@ -333,7 +336,7 @@ class _ItemSelectionState extends State<ItemSelection> {
                     child: FadeInImage.assetNetwork(
                       height: 50, width: 50,
                       placeholder: 'assets/img/no-img.png',
-                      image: Request.baseUrl()+'/product_image/'+widget.data['image'],
+                      image: Http.baseUrl(url: 'product_image/'+widget.data['image']),
                     ),
                   ),
 
@@ -451,7 +454,7 @@ class _ItemSelectionState extends State<ItemSelection> {
                       if(qty.text == '0' && pcs.text == '0'){
                         Wh.toast('Inputkan jumlah pembelian');
                       }else{
-                        Navigator.pop(context, {'item': {'product_id': widget.data['id'], 'qty': qty.text, 'qty_pcs': pcs.text, 'name': widget.data['name'], 'price': widget.data['price'], 'volume': widget.data['volume']}});
+                        Navigator.pop(context, {'item': {'product_id': widget.data['id'], 'qty': int.parse(qty.text), 'qty_pcs': int.parse(pcs.text), 'name': widget.data['name'], 'price': widget.data['price'], 'volume': widget.data['volume']}});
                       }
                     },
                     text: 'OK',

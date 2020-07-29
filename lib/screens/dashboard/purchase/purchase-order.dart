@@ -1,4 +1,3 @@
-import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -21,11 +20,11 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
 
     String uid = await Auth.id();
 
-    Request.get('purchase?created_by='+uid, then: (_, data){
+    Http.get('purchase?created_by='+uid, then: (_, data){
       Map res = decode(data);
-      orders = filter = res['data']; print(res);
+      orders = filter = res['data'];
 
-      setState(() => loading = false );
+      if(mounted) setState(() => loading = false );
     }, error: (err){
       setState(() => loading = false );
       onError(context, response: err, popup: true);
@@ -39,7 +38,20 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
 
   @override
   Widget build(BuildContext context) {
-    return loading ? ListSkeleton(length: 15) : filter.length == 0 ? Wh.noData(message: 'Anda tidak memiliki transaksi dalam proses\nTap + untuk menambahkan') : 
+    return loading ? ListSkeleton(length: 15) : filter.length == 0 ? 
+
+      RefreshIndicator( onRefresh: () async{  getData();  },
+        child: Center(
+          child: PreventScrollGlow(
+            child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
+                Wh.noData(message: 'Anda tidak memiliki transaksi dalam proses\nTap + untuk menambahkan')
+              ],
+            ),
+          ),
+        )
+      ) :
     
     RefreshIndicator(
       onRefresh: () async{
@@ -74,6 +86,14 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       text(nformat(data['grand_total']), bold: true),
+                      Container(
+                        padding: EdgeInsets.only(left: 5, right: 5),
+                        decoration: BoxDecoration(
+                          color: TColor.orange(),
+                          borderRadius: BorderRadius.circular(2)
+                        ),
+                        child: text(data['status'], color: Colors.white),
+                      )
                     ]
                   ),
 

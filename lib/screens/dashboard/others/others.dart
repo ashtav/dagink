@@ -1,3 +1,4 @@
+import 'package:dagink/screens/login/login.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,24 @@ class _OthersState extends State<Others> {
   @override
   void initState() {
     super.initState(); initAuth();
+  }
+
+  logout(){
+    showDialog(
+      context: widget.ctx,
+      child: OnProgress()
+    );
+
+    Http.get('logout', then: (_, data){
+      clearPrefs(except: ['user','order']);
+
+      Navigator.of(widget.ctx).popUntil((route) => route.isFirst);
+      Navigator.of(widget.ctx).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Login()));
+
+    }, error: (err){
+      onError(context, response: err);
+      Navigator.pop(context);
+    });
   }
 
 
@@ -156,12 +175,16 @@ class _OthersState extends State<Others> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: List.generate(1, (i){
-                        List  labels = ['Logout'],
+                        List labels = ['Logout'],
                               icons = [Ln.signout()];
 
                         return WidSplash(
                           onTap: (){
-
+                            Wh.confirmation(widget.ctx, message: 'Yakin ingin keluar dari akun ini?', confirmText: 'Keluar Sekarang', then: (res){
+                              if(res == 0){
+                                logout();
+                              }
+                            });
                           },
                           color: Colors.white,
                           child: Container(

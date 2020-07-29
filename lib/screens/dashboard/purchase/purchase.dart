@@ -4,7 +4,6 @@ import 'package:dagink/screens/dashboard/purchase/cart.dart';
 import 'package:dagink/screens/dashboard/purchase/forms/form-purchase.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase-history.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase-order.dart';
-import 'package:dagink/services/api/api.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +34,7 @@ class _PurchaseState extends State<Purchase> {
 
     String uid = await Auth.id();
 
-    Request.get('purchase?created_by='+uid, then: (_, data){
+    Http.get('purchase?created_by='+uid, then: (_, data){
       Map res = decode(data);
       purchases = filter = res['data'];
 
@@ -56,7 +55,7 @@ class _PurchaseState extends State<Purchase> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Wh.appBar(context, title: 'Pembelian', elevation: 0, actions: [
+      appBar: Wh.appBar(context, title: 'Pembelian', elevation: 0, back: false, center: true, actions: [
         // IconButton(
         //   icon: loading ? Wh.spiner() : Icon(Ln.refresh()),
         //   onPressed: loading ? null : (){
@@ -83,7 +82,19 @@ class _PurchaseState extends State<Purchase> {
           ),
           
           onPressed: (){
-            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Cart(widget.ctx)));
+            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Cart(widget.ctx))).then((value){
+              if(value != null){
+                if(value['added'] != null){
+                  tabContent = SizedBox.shrink();
+
+                  Timer(Duration(milliseconds: 300), (){
+                    setState(() {
+                      tabContent = PurchaseOrder();
+                    });
+                  });
+                }
+              }
+            });
           },
         ),
       ]),

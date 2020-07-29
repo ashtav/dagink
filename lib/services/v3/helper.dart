@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dagink/services/v2/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,9 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_icons/flutter_icons.dart';
 
 class Ln {
   static home() => LineAwesomeIcons.home;
@@ -31,6 +36,339 @@ class Ln {
   static question() => LineAwesomeIcons.question_circle;
   static signout() => LineAwesomeIcons.alternate_sign_out;
   static star() => LineAwesomeIcons.star;
+}
+
+class Http {
+  static baseUrl({String url}){
+    return 'https://daging-dev.bukakode.com'+(url == null ? '' : '/'+url);
+  }
+
+  static get(url, {bool debug: false, bool authorization: true, Map header, Function then, Function error}) async{
+    
+    var con = await Connection.check();
+
+    if(con){
+      String token = await Auth.token();
+
+      var defaultHeader = {
+        HttpHeaders.authorizationHeader: token, 'Accept': 'application/json'
+      };
+
+      if(header != null){
+        header.forEach((key, value) {
+          defaultHeader[key] = value;
+        });
+      }
+
+      try {
+        http.get(baseUrl(url: url), headers: !authorization ? {} : defaultHeader).then((res){
+          if(debug){
+            print('# request : '+res.request.toString());
+            print('# status : '+res.statusCode.toString());
+            print('# body : '+res.body.toString());
+          }
+
+          if(res.statusCode != 200 && res.statusCode != 201){
+            var response = {'status': res.statusCode, 'body': decode(res.body)};
+            error(response);
+          }else{
+            if(then != null) then(res.statusCode, res.body);
+          }
+        });
+      } catch (e) {
+        if(e is PlatformException) {
+          if(error != null) error(e.message);
+        }
+      }
+
+    }else{
+      Wh.toast('Periksa koneksi internet Anda');
+    }
+  }
+
+  static post(url, {data, bool debug: false, bool authorization: true, Map header, Function then, Function error}) async{
+    
+    var con = await Connection.check();
+
+    if(con){
+      String token = await Auth.token();
+
+      var defaultHeader = {
+        HttpHeaders.authorizationHeader: token, 'Accept': 'application/json'
+      };
+
+      if(header != null){
+        header.forEach((key, value) {
+          defaultHeader[key] = value;
+        });
+      }
+
+      try {
+        http.post(baseUrl(url: url), body: data == null ? {} : data, headers: !authorization ? {} : defaultHeader).then((res){
+          if(debug){
+            print('# request : '+res.request.toString());
+            print('# status : '+res.statusCode.toString());
+            print('# body : '+res.body.toString());
+          }
+
+          if(res.statusCode != 200 && res.statusCode != 201){
+            var response = {'status': res.statusCode, 'body': decode(res.body)};
+            error(response);
+          }else{
+            if(then != null) then(res.statusCode, res.body);
+          }
+        });
+      } catch (e) {
+        if(e is PlatformException) {
+          if(error != null) error(e.message);
+        }
+      }
+
+    }else{
+      Wh.toast('Periksa koneksi internet Anda');
+    }
+  }
+
+  static put(url, {Map data, bool debug: false, bool authorization: true, Map header, Function then, Function error}) async{
+    
+    var con = await Connection.check();
+
+    if(con){
+      String token = await Auth.token();
+
+      var defaultHeader = {
+        HttpHeaders.authorizationHeader: token, 'Accept': 'application/json'
+      };
+
+      if(header != null){
+        header.forEach((key, value) {
+          defaultHeader[key] = value;
+        });
+      }
+
+      try {
+        http.put(baseUrl(url: url), body: data == null ? {} : data, headers: !authorization ? {} : defaultHeader).then((res){
+          if(debug){
+            print('# request : '+res.request.toString());
+            print('# status : '+res.statusCode.toString());
+            print('# body : '+res.body.toString());
+          }
+
+          if(res.statusCode != 200 && res.statusCode != 201){
+            var response = {'status': res.statusCode, 'body': decode(res.body)};
+            error(response);
+          }else{
+            if(then != null) then(res.statusCode, res.body);
+          }
+        });
+      } catch (e) {
+        if(e is PlatformException) {
+          if(error != null) error(e.message);
+        }
+      }
+
+    }else{
+      Wh.toast('Periksa koneksi internet Anda');
+    }
+  }
+
+  static delete(url, {Map data, bool debug: false, bool authorization: true, Map header, Function then, Function error}) async{
+    
+    var con = await Connection.check();
+
+    if(con){
+      String token = await Auth.token();
+
+      var defaultHeader = {
+        HttpHeaders.authorizationHeader: token, 'Accept': 'application/json'
+      };
+
+      if(header != null){
+        header.forEach((key, value) {
+          defaultHeader[key] = value;
+        });
+      }
+
+      try {
+        http.delete(baseUrl(url: url), headers: !authorization ? {} : defaultHeader).then((res){
+          if(debug){
+            print('# request : '+res.request.toString());
+            print('# status : '+res.statusCode.toString());
+            print('# body : '+res.body.toString());
+          }
+
+          if(res.statusCode != 200 && res.statusCode != 201){
+            var response = {'status': res.statusCode, 'body': decode(res.body)};
+            error(response);
+          }else{
+            if(then != null) then(res.statusCode, res.body);
+          }
+        });
+      } catch (e) {
+        if(e is PlatformException) {
+          if(error != null) error(e.message);
+        }
+      }
+
+    }else{
+      Wh.toast('Periksa koneksi internet Anda');
+    }
+  }
+
+}
+
+
+// ERROR HANDLER
+onError(context, {response, bool popup: false, backOnDismiss: true, backOnError: false, Function then}){
+  var status = response['status'], message = response['body']['message'];
+
+  switch (status) {
+    case 403:
+
+      if(popup){
+        showDialog(
+          context: context,
+          child: ErrorPopup(status: status, message: message)
+        ).then((_){
+          if(backOnDismiss){
+            Navigator.pop(context);
+          }
+        });
+      }else{
+        Wh.toast(status.toString()+' - '+message);
+      }
+      
+      break;
+
+    case 404:
+      if(popup){
+        showDialog(
+          context: context,
+          child: ErrorPopup(status: status, message: message)
+        ).then((_){
+          if(backOnDismiss){
+            Navigator.pop(context);
+          }
+        });
+      }else{
+        Wh.toast(message);
+      }
+
+    break;
+
+    case 500:
+      showDialog(
+        context: context,
+        child: ErrorPopup(status: status, icon: Feather.server, message: 'Internal server error!')
+      ).then((_){
+        if(backOnDismiss){
+          Navigator.pop(context);
+        }
+
+        if(then!= null) then(status);
+      });
+    break;
+
+    case 401:
+      Wh.toast('Session expired, coba login ulang.');
+    break;
+
+    default: //Wh.toast(status.toString()+' - Unknown Error'); print(response['body']);
+      response['body'].forEach((k, v){
+        Wh.toast(response['body'][k] is List ? response['body'][k].join('') : response['body']['message']);
+      });
+
+      if(backOnError){
+        Navigator.pop(context);
+      }
+  }
+}
+
+class ErrorPopup extends StatefulWidget {
+  ErrorPopup({this.status, this.icon, this.message}); final status, icon, message;
+
+  @override
+  _ErrorPopupState createState() => _ErrorPopupState();
+}
+
+class _ErrorPopupState extends State<ErrorPopup> {
+  @override
+  Widget build(BuildContext context) {
+    return ZoomIn(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: Material(
+              child: Container(
+                width: Mquery.width(context) - 50, height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: 
+                  BorderRadius.circular(5)
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.all(15),
+                            margin: EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: TColor.red()),
+                              borderRadius: BorderRadius.circular(50)
+                            ),
+
+                            child: Icon(widget.icon == null ? Feather.user_x : widget.icon, size: 30, color: TColor.red())
+                          ),
+
+                          Container(
+                            child: Column(
+                              children: <Widget>[
+                                text(widget.status, bold: true, size: 25, height: 3),
+                                text(ucwords(widget.message), bold: true),
+                                text('Butuh bantuan? hubungi Tim IT.', color: Colors.black54)
+                              ],
+                            )
+                          )
+                        ],
+                      ),
+                    ),
+
+                    Container(
+                      // padding: EdgeInsets.all(10),
+                      child: WidSplash(
+                        onTap: (){ Navigator.pop(context); },
+                        color: Color.fromRGBO(0, 0, 0, .05),
+                        child: Container(
+                          width: Mquery.width(context),
+                          padding: EdgeInsets.all(11),
+                          child: text('Tutup', align: TextAlign.center),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class Connection {
+  static Future check() async{
+    var con = await (Connectivity().checkConnectivity()),
+      mobile = con == ConnectivityResult.mobile,
+      wifi = con == ConnectivityResult.wifi;
+
+    return mobile || wifi ? true : false;
+  }
 }
 
 class Auth {

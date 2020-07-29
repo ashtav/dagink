@@ -67,7 +67,7 @@ class Request {
   }
 
   // await post('user', formData: {}, debug: true, then: (res){ }, error: (err){ })
-  static post(url, {formData, debug: false, authorization: true, Function then, Function error}) async{
+  static post(url, {formData, debug: false, authorization: true, Function then, Function error, Map header}) async{
     var prefs = await SharedPreferences.getInstance();
 
     // get api from local data
@@ -82,7 +82,7 @@ class Request {
 
         try {
           http.post(api(url), body: formData == null ? {} : formData, headers: !authorization ? {} : {
-            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json', 'Content-Type': 'application/json'
+            HttpHeaders.authorizationHeader: prefs.getString('token'), 'Accept': 'application/json', //'Content-Type': 'application/json'
           }).then((res){
             if(debug){
               print('# request : '+res.request.toString());
