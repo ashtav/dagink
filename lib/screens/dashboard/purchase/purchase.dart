@@ -4,6 +4,7 @@ import 'package:dagink/screens/dashboard/purchase/cart.dart';
 import 'package:dagink/screens/dashboard/purchase/forms/form-purchase.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase-history.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase-order.dart';
+import 'package:dagink/screens/dashboard/purchase/stock.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -56,12 +57,12 @@ class _PurchaseState extends State<Purchase> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Wh.appBar(context, title: 'Pembelian', elevation: 0, back: false, center: true, actions: [
-        // IconButton(
-        //   icon: loading ? Wh.spiner() : Icon(Ln.refresh()),
-        //   onPressed: loading ? null : (){
-        //     getData();
-        //   },
-        // ),
+        IconButton(
+          icon: loading ? Wh.spiner() : Icon(Ln.sortNumeric()),
+          onPressed: loading ? null : (){
+            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Stock(widget.ctx)));
+          },
+        ),
 
         IconButton(
           icon: Stack(
@@ -97,6 +98,7 @@ class _PurchaseState extends State<Purchase> {
             });
           },
         ),
+
       ]),
 
       body: //loading ? ListSkeleton(length: 15) : filter.length == 0 ? Wh.noData(message: 'Tidak ada data pembelian\nTap + untuk menambahkan') :

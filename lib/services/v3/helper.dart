@@ -36,6 +36,7 @@ class Ln {
   static question() => LineAwesomeIcons.question_circle;
   static signout() => LineAwesomeIcons.alternate_sign_out;
   static star() => LineAwesomeIcons.star;
+  static sortNumeric() => LineAwesomeIcons.sort_numeric_up;
 }
 
 class Http {

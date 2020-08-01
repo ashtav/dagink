@@ -16,7 +16,7 @@ class _CartState extends State<Cart> {
 
   bool loading = false, isSubmit = false;
 
-  List carts = [], filter = [];
+  List carts = [];
 
   double total = 0.0;
 
@@ -31,7 +31,7 @@ class _CartState extends State<Cart> {
 
     // Http.get('purchase?created_by='+uid, then: (_, data){
     //   Map res = decode(data);
-    //   carts = filter = res['data']; print(res);
+    //   carts = carts = res['data']; print(res);
 
     //   setState(() => loading = false );
     // }, error: (err){
@@ -41,7 +41,7 @@ class _CartState extends State<Cart> {
 
     getPrefs('order', dec: true).then((res){
       if(res != null){
-        carts = filter = res; //print(res);
+        carts = res; //print(res);
         initData(res);
       }
 
@@ -108,7 +108,7 @@ class _CartState extends State<Cart> {
                 removePrefs(list: ['order']);
 
                 setState(() {
-                  carts = filter = [];
+                  carts = carts = [];
                 });
               }
             });
@@ -116,7 +116,7 @@ class _CartState extends State<Cart> {
         )
       ]),
 
-      body: loading ? ListSkeleton(length: 15) : filter.length == 0 ? 
+      body: loading ? ListSkeleton(length: 15) : carts.length == 0 ? 
 
         RefreshIndicator( onRefresh: () async{  getData();  },
           child: Center(
@@ -140,87 +140,72 @@ class _CartState extends State<Cart> {
               getData();
             },
             child: ListView.builder(
-              itemCount: filter.length,
+              itemCount: carts.length,
               itemBuilder: (BuildContext context, i){
-                var data = filter[i];
+                var data = carts[i];
 
-                return GestureDetector(
-                  onTapDown: (e){
-                    // setState(() {
-                    //   list = -1;
-                    // });
-                  },
-                  onHorizontalDragUpdate: (e){
-                    print(e.delta.dx);
-                    if(e.delta.dx < -3){
-                      setState(() {
-                        list = i;
-                      });
-                    }
-                  },
-                  child: Stack(
-                    children: [
+                return WidSplash(
+                  onTap: (){
+                    Wh.options(widget.ctx, options: ['Edit','Hapus'], icons: [Ln.edit(), Ln.trash()], danger: [1], then: (res){
+                      Navigator.pop(widget.ctx);
+
+                      switch (res) {
+                        case 0:
+                          modal(widget.ctx, child: EditQty(data: data), wrap: true, then: (value){
+                            if(value != null) setState(() {
+                              data['qty'] = value['item']['qty'];
+                              data['qty_pcs'] = value['item']['qty_pcs'];
+
+                              initData(carts);
+
+                              setPrefs('order', carts, enc: true);
+                            });
+                          });
                           
-                      Container(
-                        // onTap: (){
-                        //   // Navigator.push(context, MaterialPageRoute(builder: (context) => DetailCart(widget.ctx, data: data)));
-                        // },
-                        padding: EdgeInsets.all(15), color: i % 2 == 0 ? TColor.silver() : Colors.white,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
+                          break;
+                        default:
+                          setState((){
+                            carts.removeWhere((item) => item['product_id'] == data['product_id']);
+                            initData(carts);
 
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  text(data['name'], bold: true),
-                                  text('Jumlah : '+data['qty'].toString()+' / '+data['qty_pcs'].toString())
+                            setPrefs('order', carts, enc: true);
+                          });
+                          break;
+                      }
+                    });
+                  },
+                  color: i % 2 == 0 ? TColor.silver() : Colors.white,
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
 
-                                ]
-                              ),
-                            ),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              text(data['name'], bold: true),
+                              text('Jumlah : '+data['qty'].toString()+' / '+data['qty_pcs'].toString())
 
-                            Container(
-                              margin: EdgeInsets.only(left: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  text(nformat(data['price']))
-                                ]
-                              ),
-                            ),
-
-                          ],
-                        )
-                      ),
-
-                      AnimatedPositioned(
-                        right: list == i ? 0 : -150,
-                        duration: Duration(milliseconds: 300),
-                        child: Container(
-                          child: Row(
-                            children: List.generate(2, (i){
-                              List icons = [Ln.edit(), Ln.trash()];
-
-                              return WidSplash(
-                                onTap: (){ },
-                                color: Colors.white,
-                                child: Container(
-                                  padding: EdgeInsets.all(15),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black12)
-                                  ),
-                                  child: Icon(icons[i]),
-                                ),
-                              );
-                            })
+                            ]
                           ),
                         ),
-                      )
-                    ]
-                  )
+
+                        Container(
+                          margin: EdgeInsets.only(left: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              text(nformat(data['price']))
+                            ]
+                          ),
+                        ),
+
+                      ],
+                    )
+                  ),
                 );
               },
             ),
@@ -247,6 +232,153 @@ class _CartState extends State<Cart> {
           )
         ]
       )
+    );
+  }
+}
+
+class EditQty extends StatefulWidget {
+  EditQty({this.data});
+
+  final data;
+
+  @override
+  _EditQtyState createState() => _EditQtyState();
+}
+
+class _EditQtyState extends State<EditQty> {
+
+  var qty = TextEditingController(text: '0'),
+      pcs = TextEditingController(text: '0');
+
+  
+  _add({TextEditingController controller}){
+    var c = controller;
+
+    if(c.text == ''){
+      controller.text = '0';
+    }else{
+      controller.text = (int.parse(c.text) + 1).toString();
+    }
+  }
+
+  _min({TextEditingController controller}){
+    var c = controller;
+
+    if(c.text == '' || c.text == '0'){
+      controller.text = '0';
+    }else{
+      controller.text = (int.parse(c.text) - 1).toString();
+    }
+  }
+
+  initInput(){
+    if(widget.data != null){
+      var data = widget.data;
+
+      qty.text = data['qty'].toString();
+      pcs.text = data['qty_pcs'].toString();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState(); initInput();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Material(
+          child: Container(
+            padding: EdgeInsets.all(15),
+            child: Column(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: text(widget.data['name'])
+                    )
+                  ],
+                ),
+
+
+                Container(
+                  margin: EdgeInsets.only(top: 15, bottom: 15),
+                  child: Row(
+                    children: [
+
+                      Expanded(
+                        child: TextInput(
+                          hint: 'Jumlah dus', controller: qty, enabled: false, type: TextInputType.datetime, length: 11, space: 0, prefix: Container(child: text('QTY'), margin: EdgeInsets.only(right: 10),),
+                        ),
+                      ),
+
+                      Container(
+                        margin: EdgeInsets.only(left: 11),
+                        child: WidSplash(
+                          onTap: (){ _min(controller: qty); },
+                          child: Icon(Ln.minus()), radius: BorderRadius.circular(50),
+                          padding: EdgeInsets.all(11),
+                        ),
+                      ),
+
+                      WidSplash(
+                        onTap: (){ _add(controller: qty); },
+                        child: Icon(Ln.plus()), radius: BorderRadius.circular(50),
+                        padding: EdgeInsets.all(11),
+                      )
+
+                    ]
+                  )
+                ),
+
+                Container(
+                  margin: EdgeInsets.only(bottom: 15),
+                  child: Row(
+                    children: [
+
+                      Expanded(
+                        child: TextInput(
+                          hint: 'Jumlah pcs', controller: pcs, enabled: false, type: TextInputType.datetime, length: 11, space: 0, prefix: Container(child: text('PCS'), margin: EdgeInsets.only(right: 10),)
+                        ),
+                      ),
+
+                      Container(
+                        margin: EdgeInsets.only(left: 11),
+                        child: WidSplash(
+                          onTap: (){ _min(controller: pcs); },
+                          child: Icon(Ln.minus()), radius: BorderRadius.circular(50),
+                          padding: EdgeInsets.all(11),
+                        ),
+                      ),
+
+                      WidSplash(
+                        onTap: (){ _add(controller: pcs); },
+                        child: Icon(Ln.plus()), radius: BorderRadius.circular(50),
+                        padding: EdgeInsets.all(11),
+                      )
+
+                    ]
+                  )
+                ),
+
+                Button(
+                  onTap: (){
+                    if(qty.text == '0' && pcs.text == '0'){
+                      Wh.toast('Inputkan jumlah pembelian');
+                    }else{
+                      Navigator.pop(context, {'item': {'product_id': widget.data['id'], 'qty': int.parse(qty.text), 'qty_pcs': int.parse(pcs.text), 'name': widget.data['name'], 'price': widget.data['price'], 'volume': widget.data['volume']}});
+                    }
+                  },
+                  text: 'OK',
+                ),
+
+              ],
+            ),
+          ),
+        )
+      ],
     );
   }
 }

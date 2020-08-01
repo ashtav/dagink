@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dagink/screens/dashboard/dashboard.dart';
 import 'package:dagink/screens/login/login.dart';
 import 'package:dagink/services/api/api.dart';
@@ -12,17 +14,26 @@ class Authentication extends StatefulWidget {
 
 class _AuthenticationState extends State<Authentication> {
 
+  Timer timer;
+
   _toLogin(){
     Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
   }
 
   initAuthentication() async{
+
+    timer = Timer(Duration(seconds: 10), (){
+      _toLogin();
+    });
+
     var token = await Auth.token();
     if(token != null){
       Request.get('me', then: (_, data){
+        timer.cancel();
         Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
       }, error: (err){ _toLogin(); });
     }else{
+      timer.cancel();
       _toLogin();
     }
   }

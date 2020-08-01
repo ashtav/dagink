@@ -89,7 +89,7 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
                       Container(
                         padding: EdgeInsets.only(left: 5, right: 5),
                         decoration: BoxDecoration(
-                          color: TColor.orange(),
+                          color: data['status'] == 'waiting' ? TColor.orange() : data['status'] == 'confirmed' ? TColor.blue() : data['status'] == 'approved' ? TColor.green() : TColor.red(),
                           borderRadius: BorderRadius.circular(2)
                         ),
                         child: text(data['status'], color: Colors.white),

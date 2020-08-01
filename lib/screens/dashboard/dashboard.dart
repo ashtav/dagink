@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dagink/screens/dashboard/home/home.dart';
 import 'package:dagink/screens/dashboard/others/others.dart';
 import 'package:dagink/screens/dashboard/purchase/purchase.dart';
+import 'package:dagink/screens/dashboard/sales/sales.dart';
 import 'package:dagink/screens/dashboard/store/store.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
@@ -107,7 +108,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                           switch (index) {
                             case 0: return Home(context); break;
                             case 1: return Store(context); break;
-                            case 2: return Home(context); break;
+                            case 2: return Sales(context); break;
                             case 3: return Purchase(context); break;
                             default: return Others(context); break;
                           }
