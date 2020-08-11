@@ -11,8 +11,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
 
-  var email = TextEditingController(text: 'arisudarma1711@gmail.com'),
-      password = TextEditingController(text: '1234qwer');
+  var email = TextEditingController(text: 'itachi@gmail.com'),
+      password = TextEditingController(text: '123qweqwe');
 
   var emailNode = FocusNode(),
       passNode = FocusNode();

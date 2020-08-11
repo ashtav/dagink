@@ -160,16 +160,16 @@ class _StoreState extends State<Store> {
                       child: Container(
                         child: Row(
                           children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(right: 10),
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black12),
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(3)
-                              ),
-                              child: Icon(Ln.store(), size: 25,),
-                            ),
+                            // Container(
+                            //   margin: EdgeInsets.only(right: 10),
+                            //   padding: EdgeInsets.all(10),
+                            //   decoration: BoxDecoration(
+                            //     border: Border.all(color: Colors.black12),
+                            //     color: Colors.white,
+                            //     borderRadius: BorderRadius.circular(3)
+                            //   ),
+                            //   child: Icon(Ln.store(), size: 25,),
+                            // ),
 
                             Flexible(
                               child: Column(

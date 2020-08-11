@@ -1,8 +1,13 @@
+import 'package:dagink/screens/dashboard/purchase/detail-purchase.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
 
 class PurchaseOrder extends StatefulWidget {
+  PurchaseOrder(this.ctx);
+
+  final ctx;
+
   @override
   _PurchaseOrderState createState() => _PurchaseOrderState();
 }
@@ -22,7 +27,22 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
 
     Http.get('purchase?created_by='+uid, then: (_, data){
       Map res = decode(data);
-      orders = filter = res['data'];
+      var _data = res['data'];
+
+      // filter data (order or history) berdasarkan tanggal
+      List filtered = [];
+
+      final now = DateTime.now();
+
+      for (var i = 0; i < _data.length; i++) {
+        var date = DateTime.parse(_data[i]['created_at']);
+
+        if(now.difference(date).inHours < 24 || _data[i]['status'] == 'waiting'){
+          filtered.add(_data[i]);
+        }
+      }
+
+      orders = filter = filtered;
 
       if(mounted) setState(() => loading = false );
     }, error: (err){
@@ -63,11 +83,34 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
           var data = filter[i];
 
           return WidSplash(
-            onTap: (){
+              onTap: (){
+                Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => DetailPurchase(widget.ctx, data: data)));
+              },
+              onLongPress: data['status'] != 'waiting' ? null : (){
+                Wh.confirmation(widget.ctx, message: 'Yakin ingin membatalkan pembelian ini?', confirmText: 'Batalkan Pembelian', then: (res){
+                  if(res == 0){
+                    Navigator.pop(widget.ctx);
 
-            },
-            child: WidSplash(
-              onTap: (){ },
+                    showDialog(
+                      context: widget.ctx,
+                      child: OnProgress()
+                    );
+
+                    Http.put('purchase/'+data['id'].toString()+'/cancel', data: {}, then: (_, data){
+                      Navigator.pop(widget.ctx);
+                      Wh.toast('Pembelian dibatalkan');
+
+                      setState(() {
+                        orders[i]['status'] = 'cancel';
+                        filter = orders;
+                      });
+
+                    }, error: (err){
+                      onError(context, response: err);
+                    });
+                  }
+                });
+              },
               padding: EdgeInsets.all(15), color: i % 2 == 0 ? TColor.silver() : Colors.white,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -89,7 +132,7 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
                       Container(
                         padding: EdgeInsets.only(left: 5, right: 5),
                         decoration: BoxDecoration(
-                          color: data['status'] == 'waiting' ? TColor.orange() : data['status'] == 'confirmed' ? TColor.blue() : data['status'] == 'approved' ? TColor.green() : TColor.red(),
+                          color: data['status'] == 'waiting' ? TColor.orange() : data['status'] == 'confirmed' ? TColor.blue() : data['status'] == 'approved' ? TColor.green() : data['status'] == 'cancel' ? TColor.gray() : TColor.red(),
                           borderRadius: BorderRadius.circular(2)
                         ),
                         child: text(data['status'], color: Colors.white),
@@ -99,8 +142,6 @@ class _PurchaseOrderState extends State<PurchaseOrder> {
 
                 ],
               )
-              
-            ),
           );
         },
       ),

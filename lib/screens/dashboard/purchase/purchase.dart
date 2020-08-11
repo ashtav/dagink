@@ -46,11 +46,11 @@ class _PurchaseState extends State<Purchase> {
     });
   }
 
-  Widget tabContent = PurchaseOrder();
+  Widget tabContent = SizedBox.shrink();
 
   @override
   void initState() {
-    super.initState(); tabContent = tab == 0 ? PurchaseOrder() : PurchaseHistory();
+    super.initState(); tabContent = tab == 0 ? PurchaseOrder(widget.ctx) : PurchaseHistory(widget.ctx);
   }
 
   @override
@@ -90,7 +90,7 @@ class _PurchaseState extends State<Purchase> {
 
                   Timer(Duration(milliseconds: 300), (){
                     setState(() {
-                      tabContent = PurchaseOrder();
+                      tabContent = PurchaseOrder(widget.ctx);
                     });
                   });
                 }
@@ -117,7 +117,7 @@ class _PurchaseState extends State<Purchase> {
                       setState(() {
                         tab = i;
 
-                        tabContent = tab == 0 ? PurchaseOrder() : PurchaseHistory();
+                        tabContent = tab == 0 ? PurchaseOrder(widget.ctx) : PurchaseHistory(widget.ctx);
                       });
                     },
                     child: AnimatedContainer(
@@ -157,7 +157,7 @@ class _PurchaseState extends State<Purchase> {
 
                 Timer(Duration(milliseconds: 300), (){
                   setState(() {
-                    tabContent = PurchaseOrder();
+                    tabContent = PurchaseOrder(widget.ctx);
                   });
                 });
               }
