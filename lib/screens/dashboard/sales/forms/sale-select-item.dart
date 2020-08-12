@@ -26,10 +26,28 @@ class _SaleSelectItemState extends State<SaleSelectItem> {
         ListView.builder(
           itemCount: items.length,
           itemBuilder: (BuildContext context, i){
+            var data = items[i];
+
+            print(data);
+
             return WidSplash(
               onTap: (){ },
+              color: i % 2 == 0 ? TColor.silver() : Colors.white,
               child: Container(
-                child: text('text'),
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    text(data['product']['code']+' - '+data['product']['name'], bold: true),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        text(nformat(data['product']['sale_price'])),
+                        text(data['qty']+'/'+data['qty_pcs'])
+                      ],
+                    )
+                  ]
+                )
               ),
             );
           }
@@ -38,7 +56,14 @@ class _SaleSelectItemState extends State<SaleSelectItem> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: TColor.azure(),
         onPressed: (){
-          Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormItem(widget.ctx)));
+          Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormItem(widget.ctx))).then((res) async{
+            if(res != null){
+              var listItem = await LocalData.get('items');
+              setState(() {
+                items = decode(listItem);
+              });
+            }
+          });
         },
         child: Icon(Ln.plus()),
       ),

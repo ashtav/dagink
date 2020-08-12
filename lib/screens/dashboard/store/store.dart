@@ -193,7 +193,7 @@ class _StoreState extends State<Store> {
       
        
       floatingActionButton: FloatingActionButton(
-        heroTag: 'store',
+        heroTag: 'store', backgroundColor: TColor.azure(),
         child: Icon(Ln.plus()),
         onPressed: (){
           Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormStore())).then((value){

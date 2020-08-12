@@ -14,39 +14,105 @@ class FormItem extends StatefulWidget {
 class _FormItemState extends State<FormItem> {
 
   var product = TextEditingController(),
-      qty = TextEditingController(),
-      pcs = TextEditingController(),
+      qty = TextEditingController(text: '0'),
+      pcs = TextEditingController(text: '0'),
       salesPrice = TextEditingController();
 
   String productId;
+  var dataProduct;
+
+  _save() async{ //removePrefs(list: ['items']);
+    if(productId == null || qty.text.isEmpty && pcs.text.isEmpty || salesPrice.text.isEmpty || qty.text == '0' && pcs.text == '0'){
+      Wh.toast('Lengkapi form');
+    }else{
+      var items = await LocalData.get('items');
+
+      List listItem = [];
+
+      var formData = {'product': dataProduct, 'qty': qty.text, 'qty_pcs': pcs.text, 'sales_price': salesPrice.text};
+
+      if(items == null){
+        listItem.add(formData);
+      }else{
+        listItem = decode(items);
+        listItem.add(formData);
+      }
+
+      setPrefs('items', encode(listItem));
+
+      Navigator.pop(context, {'added': true});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: Wh.appBar(context, title: 'Tambah Barang', center: true),
+    return Unfocus(
+      child: Scaffold(
+        appBar: Wh.appBar(context, title: 'Tambah Barang', center: true),
 
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(15),
-        child: Column(
-          children: [
+        body: Column(
+          children: <Widget>[
 
-            SelectInput(
-              label: 'Pilih Barang', hint: 'Pilih barang',
-              controller: product, select: (){
-                modal(widget.ctx, child: ListProduct(), then: (res){
-                  if(res != null){
-                    setState(() {
-                      productId = res['id'].toString();
-                      product.text = res['name'];
-                    });
-                  }
-                });
-              },
+            Expanded(
+              child: SingleChildScrollView(
+              padding: EdgeInsets.all(15),
+              child: Column(
+                children: [
+
+                  SelectInput(
+                    label: 'Pilih Barang', hint: 'Pilih barang',
+                    controller: product, select: (){
+                      modal(widget.ctx, child: ListProduct(), then: (res){
+                        if(res != null){
+                          dataProduct = res;
+                          
+                          setState(() {
+                            productId = res['id'].toString();
+                            product.text = res['name'];
+                            salesPrice.text = res['sale_price'].toString();
+                          });
+                        }
+                      });
+                    },
+                  ),
+
+                  TextInput(
+                    controller: qty, type: TextInputType.datetime,
+                    label: 'Qty', hint: 'Jumlah Qty', length: 11,
+                  ),
+
+                  TextInput(
+                    controller: pcs, type: TextInputType.datetime,
+                    label: 'Pcs', hint: 'Jumlah Pcs', length: 11,
+                  ),
+
+                  TextInput(
+                    controller: salesPrice, type: TextInputType.datetime,
+                    label: 'Harga Jual', hint: 'Harga jual', length: 11,
+                  )
+
+                ]
+              ),
+            )
             ),
 
+            Container(
+              margin: EdgeInsets.all(15),
+              child: Column(
+                children: [
+
+                  Button(
+                    onTap: (){ _save(); },
+                    text: 'Simpan',
+                  ),
+
+                ]
+              )
+            )
+
           ]
-        ),
-      )
+        )
+      ),
     );
   }
 }
@@ -107,7 +173,7 @@ class _ListProductState extends State<ListProduct> {
 
               return WidSplash(
                 onTap: (){
-                  Navigator.pop(context, {'id': data['id'], 'name': data['name']});
+                  Navigator.pop(context, data);
                 },
                 color: i % 2 == 0 ? TColor.silver() : Colors.white,
                 padding: EdgeInsets.all(15),
