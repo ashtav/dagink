@@ -23,18 +23,11 @@ class _SalesState extends State<Sales> {
         heroTag: 'sale',
         child: Icon(Ln.plus()),
         onPressed: (){
-          Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormSale(widget.ctx))).then((value){
-            // if(value != null){
-            //   if(value['added'] != null){
-            //     tabContent = SizedBox.shrink();
-
-            //     Timer(Duration(milliseconds: 300), (){
-            //       setState(() {
-            //         tabContent = PurchaseOrder(widget.ctx);
-            //       });
-            //     });
-            //   }
-            // }
+          Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormSale(widget.ctx))).then((res){
+            if(res != null){
+              removePrefs(list: ['items']);
+              Wh.toast('Penjualan berhasil ditambahkan');
+            }
           });
         },
       ),

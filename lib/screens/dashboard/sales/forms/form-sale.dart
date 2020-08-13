@@ -29,7 +29,11 @@ class _FormSaleState extends State<FormSale> {
         'note': note.text
       };
 
-      Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => SaleSelectItem(widget.ctx, data: formData)));
+      Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => SaleSelectItem(widget.ctx, data: formData))).then((res){
+        if(res != null){
+          Navigator.pop(context, {'added': true});
+        }
+      });
     }
   }
 

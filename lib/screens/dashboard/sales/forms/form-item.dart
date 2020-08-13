@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
 
 class FormItem extends StatefulWidget {
-  FormItem(this.ctx);
+  FormItem(this.ctx, {this.data});
 
-  final ctx;
+  final ctx, data;
 
   @override
   _FormItemState createState() => _FormItemState();
@@ -18,8 +20,10 @@ class _FormItemState extends State<FormItem> {
       pcs = TextEditingController(text: '0'),
       salesPrice = TextEditingController();
 
+  var rsp = TextEditingController();
+
   String productId;
-  var dataProduct;
+  var dataProduct, subtotal = 0.0;
 
   _save() async{ //removePrefs(list: ['items']);
     if(productId == null || qty.text.isEmpty && pcs.text.isEmpty || salesPrice.text.isEmpty || qty.text == '0' && pcs.text == '0'){
@@ -29,7 +33,7 @@ class _FormItemState extends State<FormItem> {
 
       List listItem = [];
 
-      var formData = {'product': dataProduct, 'qty': qty.text, 'qty_pcs': pcs.text, 'sales_price': salesPrice.text};
+      var formData = {'product': dataProduct, 'qty': qty.text, 'qty_pcs': pcs.text, 'sales_price': salesPrice.text, 'subtotal': subtotal.toString()};
 
       if(items == null){
         listItem.add(formData);
@@ -38,10 +42,46 @@ class _FormItemState extends State<FormItem> {
         listItem.add(formData);
       }
 
-      setPrefs('items', encode(listItem));
-
-      Navigator.pop(context, {'added': true});
+      if(widget.data == null){
+        setPrefs('items', encode(listItem));
+        Navigator.pop(context, {'added': true});
+      }else{
+        Navigator.pop(context, {'updated': true, 'data': formData});
+      }
+      
     }
+  }
+
+  initForm() async{
+    var data = widget.data;
+
+    if(data != null){
+      setState(() {
+        dataProduct = data['product'];
+
+        productId = data['product']['product_id'].toString();
+        product.text = data['product']['name'];
+        qty.text = data['qty'];
+        pcs.text = data['qty_pcs'];
+        salesPrice.text = data['sales_price'];
+      });
+
+      setSubtotal();
+    }
+  }
+
+  setSubtotal(){
+    var _qty = double.parse(qty.text == '' ? '0' : qty.text), _pcs = double.parse(pcs.text == '' ? '0' : pcs.text), _price = double.parse(salesPrice.text == '' ? '0' : salesPrice.text);
+
+    setState(() {
+      var x = (_pcs / dataProduct['volume']);
+      subtotal = (_qty + x) * _price;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState(); initForm();
   }
 
   @override
@@ -57,6 +97,7 @@ class _FormItemState extends State<FormItem> {
               child: SingleChildScrollView(
               padding: EdgeInsets.all(15),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
                   SelectInput(
@@ -70,6 +111,7 @@ class _FormItemState extends State<FormItem> {
                             productId = res['id'].toString();
                             product.text = res['name'];
                             salesPrice.text = res['sale_price'].toString();
+                            rsp.text = res['recommended_sale_price'].toString();
                           });
                         }
                       });
@@ -78,17 +120,32 @@ class _FormItemState extends State<FormItem> {
 
                   TextInput(
                     controller: qty, type: TextInputType.datetime,
-                    label: 'Qty', hint: 'Jumlah Qty', length: 11,
+                    label: 'Qty', hint: 'Jumlah Qty', length: 11, change: (String s){
+                      setSubtotal();
+                    },
                   ),
 
                   TextInput(
                     controller: pcs, type: TextInputType.datetime,
-                    label: 'Pcs', hint: 'Jumlah Pcs', length: 11,
+                    label: 'Pcs', hint: 'Jumlah Pcs', length: 11, change: (String s){
+                      setSubtotal();
+                    },
+                  ),
+
+                  TextInput(
+                    controller: rsp, type: TextInputType.datetime, enabled: false,
+                    label: 'Rekomendasi Harga Jual', hint: 'Rekomendasi harga jual', length: 11,
                   ),
 
                   TextInput(
                     controller: salesPrice, type: TextInputType.datetime,
-                    label: 'Harga Jual', hint: 'Harga jual', length: 11,
+                    label: 'Harga Jual', hint: 'Harga jual', length: 11, change: (String s){
+                      setSubtotal();
+                    },
+                  ),
+
+                  Container(
+                    child: text('Subtotal : '+(subtotal == 0 ? subtotal.toString() : nformat(subtotal).toString())),
                   )
 
                 ]

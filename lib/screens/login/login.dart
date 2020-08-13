@@ -20,28 +20,38 @@ class _LoginState extends State<Login> {
   bool obsecure = true, isSubmit = false;
 
   signin(){
-    if(email.text.isEmpty || password.text.isEmpty){
-      focus(context, email.text.isEmpty ? emailNode : passNode);
-    }else{
-      setState(() => isSubmit = true );
+    requestPermissions(location: true, then: (allowed){
+      if(allowed){
+        if(email.text.isEmpty || password.text.isEmpty){
+          focus(context, email.text.isEmpty ? emailNode : passNode);
+        }else{
+          setState(() => isSubmit = true );
 
-      Http.post('login', data: {'email': email.text, 'password': password.text}, authorization: false, then: (_, data){
-        setState(() => isSubmit = false );
+          Http.post('login', data: {'email': email.text, 'password': password.text}, authorization: false, then: (_, data){
+            setState(() => isSubmit = false );
 
-        var res = decode(data),
-            user = res['data'],
-            token = 'Bearer '+res['token_data']['access_token'];
+            var res = decode(data),
+                user = res['data'],
+                token = 'Bearer '+res['token_data']['access_token'];
 
-        setPrefs('user', user, enc: true);
-        setPrefs('token', token, enc: true);
+            setPrefs('user', user, enc: true);
+            setPrefs('token', token, enc: true);
 
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
 
-      }, error: (err){
-        onError(context, response: err);
-        setState(() => isSubmit = false );
-      });
-    }
+          }, error: (err){
+            onError(context, response: err);
+            setState(() => isSubmit = false );
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermissions(location: true);
   }
 
   @override
