@@ -52,6 +52,11 @@ class _StoreState extends State<Store> {
   }
 
   @override
+  void initState() {
+    super.initState(); getData();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Wh.appBar(context, title: 'Toko', center: true, back: false, actions: [
