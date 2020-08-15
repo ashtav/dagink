@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:intl/intl.dart';
 
 class Ln {
   static home() => LineAwesomeIcons.home;
@@ -38,6 +39,21 @@ class Ln {
   static star() => LineAwesomeIcons.star;
   static sortNumeric() => LineAwesomeIcons.sort_numeric_up;
   static print() => LineAwesomeIcons.print;
+  static smile() => LineAwesomeIcons.smiling_face;
+}
+
+class Cur {
+  static rupiah(n){
+    final oCcy = new NumberFormat("#,##0.00", "en_US");
+
+    if(n == null){
+      return '';
+    }
+
+    var value = oCcy.format(n).toString().split('.');
+
+    return value[0].replaceAll(',', '.')+','+value[1].replaceAll('.', ',');
+  }
 }
 
 class Http {

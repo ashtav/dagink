@@ -1,4 +1,5 @@
 import 'package:dagink/services/v2/helper.dart';
+import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -11,6 +12,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  bool isLoadAchievement = true;
+
+  getAchievement() async{
+    Http.get('user/program/achievement', then: (_, data){
+      
+      print(data);
+
+      setState(() => isLoadAchievement = false );
+    }, error: (err){
+      setState(() => isLoadAchievement = false );
+      onError(context, response: err);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState(); getAchievement();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,18 +44,25 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
 
-            // Container(
-            //   padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-            //   child: Container(
-            //     padding: EdgeInsets.all(10), width: Mquery.width(context),
-            //     decoration: BoxDecoration(
-            //       borderRadius: BorderRadius.circular(3),
-            //       color: Color.fromRGBO(237, 242, 250, 1),
-            //       border: Border.all(color: Color.fromRGBO(70, 127, 207, 1))
-            //     ),
-            //     child: text('Selamat datang di Dagink'),
-            //   ),
-            // ),
+            Container(
+              padding: EdgeInsets.only(top: 15, left: 15, right: 15),
+              child: Container(
+                padding: EdgeInsets.all(10), width: Mquery.width(context),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  color: TColor.azure(),
+                  // border: Border.all(color: Color.fromRGBO(70, 127, 207, 1))
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    text('Selamat datang di Dagink', color: Colors.white),
+                    Icon(Ln.smile(), color: Colors.white)
+                  ],
+                )
+                
+              ),
+            ),
 
             Container(
               padding: EdgeInsets.all(15),

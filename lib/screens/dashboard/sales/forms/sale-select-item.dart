@@ -200,7 +200,7 @@ class _SaleSelectItemState extends State<SaleSelectItem> {
 
                 Container(
                   margin: EdgeInsets.only(bottom: 10),
-                  child: text('Grand Total : '+nformat(grandTotal, fixed: 2).toString(), bold: true),
+                  child: text('Grand Total : '+Cur.rupiah(grandTotal), bold: true),
                 ),
 
                 Button(

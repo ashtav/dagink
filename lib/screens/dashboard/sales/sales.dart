@@ -80,34 +80,32 @@ class _SalesState extends State<Sales> {
                 Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => DetailSales(widget.ctx, data: data)));
               },
               onLongPress: (){
-                Wh.options(widget.ctx, options: ['Cetak Penjualan', 'Hapus Penjualan'], icons: [Ln.print(), Ln.trash()], danger: [1], then: (res){
-                  switch (res) {
-                    case 0:
-                      
-                      break;
-                    default:
+               
+                Wh.confirmation(widget.ctx, message: 'Yakin ingin menghapus penjualan ini?', confirmText: 'Hapus Penjualan', then: (res){
+                  if(res == 0){
+                    Navigator.pop(widget.ctx);
+
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      child: OnProgress()
+                    ).then((_){
+                      if(_ != null){
+                        setState(() {
+                          sales.removeWhere((el) => el['id'] == data['id']);
+                        });
+                      }
+                    });
+
+                    Http.delete('sales/'+data['id'].toString(), then: (_, data){
+                      Navigator.pop(widget.ctx, true);
+                      Wh.toast('Berhasil dihapus');
+
+                    }, error: (err){
                       Navigator.pop(widget.ctx);
-                      Wh.confirmation(widget.ctx, message: 'Yakin ingin menghapus penjualan ini?', confirmText: 'Hapus Penjualan', then: (res){
-                        if(res == 0){
-                          Navigator.pop(widget.ctx);
+                      onError(context, response: err);
+                    });
 
-                          showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            child: OnProgress()
-                          );
-
-                          Http.delete('sales/'+data['id'].toString(), then: (_, data){
-                            Navigator.pop(widget.ctx);
-                            Wh.toast('Berhasil dihapus');
-
-                          }, error: (err){
-                            Navigator.pop(widget.ctx);
-                            onError(context, response: err);
-                          });
-
-                        }
-                      });
                   }
                 });
 
@@ -148,6 +146,8 @@ class _SalesState extends State<Sales> {
             if(res != null){
               removePrefs(list: ['items']);
               Wh.toast('Penjualan berhasil ditambahkan');
+
+              getData();
             }
           });
         },

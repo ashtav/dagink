@@ -1,12 +1,17 @@
 import 'dart:async';
 
 import 'package:dagink/services/v2/helper.dart';
+import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/services.dart';
 
 class Printer extends StatefulWidget {
+  Printer({@required this.print});
+
+  final Function print;
+
   @override
   _PrinterState createState() => _PrinterState();
 }
@@ -23,6 +28,8 @@ class _PrinterState extends State<Printer> {
 
   // cari printer thermal
   findThermalPrinter() async{
+    String deviceName = await LocalData.get('printer');
+    printer.text = deviceName ?? '';
 
     setState(() {
       isConnected = false;
@@ -54,7 +61,7 @@ class _PrinterState extends State<Printer> {
                 loading = false;
                 _devices = temp;
 
-                listDevices = ListDevices(_devices, selected: printer.text, onSelect: (res){
+                listDevices = ListDevices(_devices, selected: printer.text, isPrint: isPrint, onSelect: (res){
                   if(res != null){
                     bDevices.forEach((device){
                       if(device.name == res){
@@ -66,6 +73,11 @@ class _PrinterState extends State<Printer> {
                             try {
                               bluetooth.connect(device).then((_){
                                 hasPrinted = true; // print success
+
+                                setPrefs('printer', res);
+
+                                Navigator.pop(context);
+                                if(widget.print != null) widget.print(true);
                                 // Print(context: context, data: widget.data, items: widget.items).run();
                               }, onError: (onErr){
                                 // Navigator.pop(context, {'error': true});
@@ -75,6 +87,10 @@ class _PrinterState extends State<Printer> {
                             }
                           }else{ // jika sudah terhubung, langsung cetak
                             hasPrinted = true; // print success
+                            setPrefs('printer', res);
+                            Navigator.pop(context);
+                            if(widget.print != null) widget.print(true);
+
                             // jalankan printer
                             // Print(context: context, data: widget.data, items: widget.items).run();
                           }
@@ -128,10 +144,11 @@ class _PrinterState extends State<Printer> {
 }
 
 class ListDevices extends StatefulWidget {
-  ListDevices(this.options, {this.selected, this.onSelect});
+  ListDevices(this.options, {this.selected, this.onSelect, this.isPrint: false});
 
   final options, selected;
   final Function onSelect;
+  final bool isPrint;
 
 
   @override
@@ -196,50 +213,19 @@ class _ListDevicesState extends State<ListDevices> {
             padding: EdgeInsets.all(15),
             child: Button(
               onTap: (){
-                if(widget.onSelect != null){
-                  widget.onSelect(selected);
-                }
-                Navigator.pop(context);
+                if(widget.onSelect != null) widget.onSelect(selected ?? widget.selected); // selected ?? widget.selected -> selected == null ? widget.selected : selected,
+
+
+                // if(widget.onSelect != null){
+                //   widget.onSelect(selected ?? widget.selected);
+                // }
               },
-              text: 'Cetak',
+              text: 'Cetak', isSubmit: widget.isPrint,
             ),
           )
         
         ]
       )
     );
-
-    // return ClipRRect(
-    //   borderRadius: BorderRadius.only(
-    //     topLeft: Radius.circular(5),
-    //     topRight: Radius.circular(5)
-    //   ),
-    //   child: CupertinoPicker(
-    //     scrollController: FixedExtentScrollController(
-    //       // initialItem: _devices.indexOf(printer.text)
-    //     ),
-    //     itemExtent: 40.0,
-    //     backgroundColor: Colors.white,
-    //     onSelectedItemChanged: (int i){
-    //       // if(change != null){
-    //       //   values != null ? change(values[i]) : change(options[i]);
-    //       // }
-    //     },
-    //     children: new List<Widget>.generate(widget.options.length, (int i) {
-    //       return Container(
-    //         margin: EdgeInsets.all(3),
-    //         width: Mquery.width(context) - 100,
-    //         // padding: EdgeInsets.all(5),
-    //         decoration: BoxDecoration(
-    //           color: TColor.silver(),
-    //           borderRadius: BorderRadius.circular(25)
-    //         ),
-    //         child: Center(
-    //           child: text(ucwords(widget.options[i].toString()))
-    //         ) 
-    //       );
-    //     }),
-    //   ),
-    // );
   }
 }

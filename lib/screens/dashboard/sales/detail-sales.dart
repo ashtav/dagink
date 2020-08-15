@@ -4,6 +4,7 @@ import 'package:dagink/services/v3/helper.dart';
 import 'package:dagink/widgets/modal.dart';
 import 'package:dagink/widgets/printer.dart';
 import 'package:flutter/material.dart';
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 
 class DetailSales extends StatefulWidget {
   DetailSales(this.ctx, {this.data});
@@ -29,7 +30,7 @@ class _DetailSalesState extends State<DetailSales> {
       loading = true;
     });
 
-    var data = widget.data; print(data);
+    var data = widget.data;
 
     Http.get('sales/'+data['id'].toString(), then: (_, data){
       var res = decode(data)['data'];
@@ -124,7 +125,7 @@ class _DetailSalesState extends State<DetailSales> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        text('Grand Total : '+widget.data['grand_total'].toString(), color: Colors.white, bold: true),
+                        text('Grand Total : '+nformat(widget.data['grand_total']).toString(), color: Colors.white, bold: true),
                         text('Total Qty/Pcs : '+totalQty.toString()+' / '+totalPcs.toString(), color: Colors.white, size: 14),
                       ],
                     ),
@@ -132,7 +133,11 @@ class _DetailSalesState extends State<DetailSales> {
                     WidSplash(
                       padding: EdgeInsets.only(top: 15, bottom: 15, left: 15, right: 15),
                       onTap: (){
-                        Modal.bottom(widget.ctx, child: Printer(), wrap: true);
+
+                        Modal.bottom(widget.ctx, child: Printer(print: (b){ print(b);
+                          PrintSales(data: widget.data).run();
+                        }), wrap: true);
+
                       },
                       child: Icon(Ln.print(), color: Colors.white,),
                       color: TColor.blue(o: .3),
@@ -204,4 +209,35 @@ class _InfoPenjualanState extends State<InfoPenjualan> {
 
     );
   }
+}
+
+class PrintSales {
+  PrintSales({this.data});
+  BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
+
+
+  final data;
+
+  run(){
+    bluetooth.isConnected.then((isConnected) async{
+      if(isConnected){
+
+        bluetooth.printCustom("PT. KEMBAR PUTRA MAKMUR",1,1);
+        bluetooth.printCustom("Jl. Anggrek I No. 1, Kapal, Mengwi, Badung",0,1);
+        bluetooth.printCustom("(0361) 9006481 | www.kembarputra.com",0,1);
+
+
+
+        bluetooth.printNewLine();
+        bluetooth.printCustom('Harga sudah termasuk PPN',0,1);
+        bluetooth.printCustom('--== Terima Kasih ==--',0,1);
+        bluetooth.printNewLine();
+        bluetooth.printNewLine();
+        bluetooth.printNewLine();
+        bluetooth.paperCut();
+
+      }
+    });
+  }
+  
 }
