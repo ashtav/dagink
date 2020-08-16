@@ -1,4 +1,3 @@
-import 'package:dagink/screens/dashboard/sales/forms/form-sale.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:dagink/widgets/modal.dart';
@@ -135,7 +134,7 @@ class _DetailSalesState extends State<DetailSales> {
                       onTap: (){
 
                         Modal.bottom(widget.ctx, child: Printer(print: (b){ print(b);
-                          PrintSales(data: widget.data).run();
+                          PrintSales(data: sales).run();
                         }), wrap: true);
 
                       },
@@ -222,11 +221,34 @@ class PrintSales {
     bluetooth.isConnected.then((isConnected) async{
       if(isConnected){
 
+        List detail = data['details']; print(detail);
+
         bluetooth.printCustom("PT. KEMBAR PUTRA MAKMUR",1,1);
         bluetooth.printCustom("Jl. Anggrek I No. 1, Kapal, Mengwi, Badung",0,1);
         bluetooth.printCustom("(0361) 9006481 | www.kembarputra.com",0,1);
 
+        bluetooth.printCustom("------------------------------------------",0,1);
 
+        bluetooth.printLeftRight('Kode : '+data['code'].toString(), '     Tgl. '+data['transaction_date'],0);
+        bluetooth.printCustom('Kode Toko : '+data['store_code'].toString(),0,0);
+        bluetooth.printCustom('Penjual : '+data['name'],0,0);
+        bluetooth.printCustom("------------------------------------------",0,1);
+
+        double grandTotal = 0;
+
+        for (var i = 0; i < detail.length; i++) {
+          var item = detail[i], qty = item['qty'].toString(), pcs = item['qty_pcs'].toString();
+
+          bluetooth.printCustom(item['product_code']+' - '+item['product_name'],0,0);
+          bluetooth.printLeftRight(qty+'/'+pcs, nformat(item['sale_price'])+'         '+Cur.rupiah(item['subtotal']), 0);
+
+          grandTotal += item['subtotal'];
+        }
+
+        bluetooth.printCustom("------------------------------------------",0,1);
+
+        bluetooth.printLeftRight('Total : ', Cur.rupiah(grandTotal), 0);
+        bluetooth.printLeftRight('Grand Total : ', Cur.rupiah(grandTotal), 0);
 
         bluetooth.printNewLine();
         bluetooth.printCustom('Harga sudah termasuk PPN',0,1);
@@ -235,7 +257,6 @@ class PrintSales {
         bluetooth.printNewLine();
         bluetooth.printNewLine();
         bluetooth.paperCut();
-
       }
     });
   }

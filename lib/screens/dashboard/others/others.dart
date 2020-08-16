@@ -1,3 +1,5 @@
+import 'package:dagink/screens/dashboard/others/profile.dart';
+import 'package:dagink/screens/dashboard/others/setting-account.dart';
 import 'package:dagink/screens/login/login.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
@@ -93,6 +95,32 @@ class _OthersState extends State<Others> {
 
                   Container(
                     margin: EdgeInsets.only(top: 10),
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: TColor.azure()
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+
+                            Icon(Ln.wallet(), color: Colors.white,),
+                            Container(
+                              margin: EdgeInsets.only(left: 5),
+                              child: text('Jumlah Saldo', color: Colors.white)
+                            )
+
+                          ],
+                        ),
+
+                        text('Rp '+Cur.rupiah(user['balance']), color: Colors.white)
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    margin: EdgeInsets.only(top: 10),
                     decoration: BoxDecoration(
                       border: Border(top: BorderSide(color: Colors.black12))
                     ),
@@ -104,7 +132,14 @@ class _OthersState extends State<Others> {
 
                         return WidSplash(
                           onTap: (){
-
+                            switch (i) {
+                              case 0:
+                                Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Profile(widget.ctx)));
+                                
+                                break;
+                              default:
+                                Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => SettingAccount()));
+                            }
                           },
                           color: Colors.white,
                           child: Container(

@@ -73,8 +73,8 @@ class _HomeState extends State<Home> {
                   Column(
                     children: List.generate(2, (i) {
                       List heights = [180.0, 130.0],
-                            labels = ['Point','Pemmbelian'],
-                            values = [34, 2];
+                            labels = ['Saldo','Point'],
+                            values = ['-', '-'];
 
                       return Container(
                         padding: EdgeInsets.all(15),
@@ -110,7 +110,10 @@ class _HomeState extends State<Home> {
 
                   Column(
                     children: List.generate(2, (i) {
-                      List heights = [140.0, 230.0];
+                      List heights = [140.0, 230.0],
+                          labels = ['Pembelian','Penjualan'],
+                          values = ['-','-'];
+
 
                       return Container(
                         padding: EdgeInsets.all(15), margin: EdgeInsets.all(2),
@@ -120,7 +123,24 @@ class _HomeState extends State<Home> {
                           color: Colors.white,
                           border: Border.all(color: Colors.black12)
                         ),
-                        child: text('text'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            text(labels[i]),
+
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Center(
+                                    child: text(values[i], size: 35, bold: true),
+                                  )
+                                ]
+                              )
+                            )
+                            
+                          ]
+                        )
                       );
                     })
                   )

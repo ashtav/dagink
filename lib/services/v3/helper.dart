@@ -40,6 +40,7 @@ class Ln {
   static sortNumeric() => LineAwesomeIcons.sort_numeric_up;
   static print() => LineAwesomeIcons.print;
   static smile() => LineAwesomeIcons.smiling_face;
+  static wallet() => LineAwesomeIcons.wallet;
 }
 
 class Cur {
