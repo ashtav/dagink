@@ -41,6 +41,7 @@ class Ln {
   static print() => LineAwesomeIcons.print;
   static smile() => LineAwesomeIcons.smiling_face;
   static wallet() => LineAwesomeIcons.wallet;
+  static doc() => LineAwesomeIcons.file_contract;
 }
 
 class Cur {

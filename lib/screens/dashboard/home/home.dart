@@ -1,4 +1,5 @@
 import 'package:dagink/screens/dashboard/home/achievement.dart';
+import 'package:dagink/screens/dashboard/home/report.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -72,10 +73,10 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Column(
-                    children: List.generate(2, (i) {
-                      List heights = [180.0, 130.0],
-                            labels = ['Saldo','Point'],
-                            values = ['-', '?'];
+                    children: List.generate(3, (i) {
+                      List heights = [120.0, 130.0, 116.0],
+                            labels = ['Saldo','Point','Laporan'],
+                            values = ['-', '?','*'];
 
                       return Container(
                           margin: EdgeInsets.all(2),
@@ -88,7 +89,12 @@ class _HomeState extends State<Home> {
                             padding: EdgeInsets.all(15),
                             color: Colors.white,
                             onTap: (){
-                              Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Achievement(widget.ctx)));
+                              switch (i) {
+                                case 0: break;
+                                case 1: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Achievement(widget.ctx))); break;
+                                default: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Report(widget.ctx))); break;
+                              }
+                              
                             },
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +106,7 @@ class _HomeState extends State<Home> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Center(
-                                        child: text(values[i], size: 35, bold: true),
+                                        child: values[i] == '*' ? Icon(Ln.doc(), size: 35) : text(values[i], size: 35, bold: true),
                                       )
                                     ]
                                   )
