@@ -109,6 +109,8 @@ class _CartState extends State<Cart> {
                 setState(() {
                   carts = carts = [];
                 });
+
+                Navigator.pop(widget.ctx);
               }
             });
           },

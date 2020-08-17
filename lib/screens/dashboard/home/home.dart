@@ -1,3 +1,4 @@
+import 'package:dagink/screens/dashboard/home/achievement.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    super.initState(); getAchievement();
+    super.initState(); //getAchievement();
   }
 
   @override
@@ -74,36 +75,41 @@ class _HomeState extends State<Home> {
                     children: List.generate(2, (i) {
                       List heights = [180.0, 130.0],
                             labels = ['Saldo','Point'],
-                            values = ['-', '-'];
+                            values = ['-', '?'];
 
                       return Container(
-                        padding: EdgeInsets.all(15),
-                        margin: EdgeInsets.all(2),
-                        height: heights[i],
-                        width: Mquery.width(context) / 2 - 19,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.black12)
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            text(labels[i]),
+                          margin: EdgeInsets.all(2),
+                          height: heights[i],
+                          width: Mquery.width(context) / 2 - 19,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black12)
+                          ),
+                          child: WidSplash(
+                            padding: EdgeInsets.all(15),
+                            color: Colors.white,
+                            onTap: (){
+                              Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Achievement(widget.ctx)));
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                text(labels[i]),
 
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Center(
-                                    child: text(values[i], size: 35, bold: true),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Center(
+                                        child: text(values[i], size: 35, bold: true),
+                                      )
+                                    ]
                                   )
-                                ]
-                              )
-                            )
-                            
-                          ]
-                        )
-                        
+                                )
+                                
+                              ]
+                            ),
+                          )
+                          
                       );
                     })
                   ),
