@@ -19,6 +19,7 @@ class _StockState extends State<Stock> {
   List purchases = [], filter = [];
 
   int qty = 0, pcs = 0;
+  int totalValue = 0;
 
   getData() async{
     setState(() {
@@ -36,6 +37,10 @@ class _StockState extends State<Stock> {
 
         qty += int.parse(item['stock_qty']);
         pcs += int.parse(item['stock_pcs']);
+
+        print(item['sale_price'].runtimeType);
+
+        totalValue += item['sale_price'];
       }
 
       setState(() => loading = false );
@@ -92,7 +97,12 @@ class _StockState extends State<Stock> {
                         switch (res) {
                           case 0:
                             Navigator.pop(widget.ctx);
-                            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormEditHarga(data)));
+                            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormEditHarga(data))).then((value){
+                              if(value != null){
+                                Wh.toast('Berhasil diperbarui');
+                                getData();
+                              }
+                            });
                             
                             break;
                           default:
@@ -172,11 +182,23 @@ class _StockState extends State<Stock> {
                 borderRadius: BorderRadius.circular(3),
                 color: TColor.azure()
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: <Widget>[
-                  text('Total Stock', color: Colors.white, bold: true),
-                  text(qty.toString()+'/'+pcs.toString(), color: Colors.white, bold: true)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      text('Total Stock', color: Colors.white, bold: true),
+                      text(qty.toString()+'/'+pcs.toString(), color: Colors.white, bold: true)
+                    ],
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      text('Total Value', color: Colors.white, bold: true),
+                      text('Rp ' +nformat(totalValue), color: Colors.white, bold: true)
+                    ],
+                  ),
                 ],
               ),
             )

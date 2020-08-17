@@ -1,3 +1,4 @@
+import 'package:dagink/screens/dashboard/others/balance-histories.dart';
 import 'package:dagink/screens/dashboard/others/profile.dart';
 import 'package:dagink/screens/dashboard/others/setting-account.dart';
 import 'package:dagink/screens/login/login.dart';
@@ -95,27 +96,32 @@ class _OthersState extends State<Others> {
 
                   Container(
                     margin: EdgeInsets.only(top: 10),
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: TColor.azure()
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Row(
+                    child: WidSplash(
+                      onTap: (){
+                        Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => BalanceHistories(widget.ctx)));
+                      },
+                      color: TColor.azure(),
+                      child: Container(
+                        padding: EdgeInsets.all(15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
+                            Row(
+                              children: <Widget>[
 
-                            Icon(Ln.wallet(), color: Colors.white,),
-                            Container(
-                              margin: EdgeInsets.only(left: 5),
-                              child: text('Jumlah Saldo', color: Colors.white)
-                            )
+                                Icon(Ln.wallet(), color: Colors.white,),
+                                Container(
+                                  margin: EdgeInsets.only(left: 5),
+                                  child: text('Jumlah Saldo', color: Colors.white)
+                                )
 
+                              ],
+                            ),
+
+                            text('Rp '+Cur.rupiah(user['balance']), color: Colors.white)
                           ],
                         ),
-
-                        text('Rp '+Cur.rupiah(user['balance']), color: Colors.white)
-                      ],
+                      ),
                     ),
                   ),
 

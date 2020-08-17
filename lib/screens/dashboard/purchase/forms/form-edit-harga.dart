@@ -33,14 +33,13 @@ class _FormEditStockState extends State<FormEditHarga> {
         isSubmit = true;
       });
 
-      Http.put('profuct/'+widget.data['product_id'].toString()+'/sales_price', data: {}, debug: true, header: {'Content-Type': 'application/json'}, then: (_, data){
+      Http.put('product/'+widget.data['product_id'].toString()+'/sales_price', data: {'price': price.text}, debug: true, then: (_, data){
         setState(() => isSubmit = false );
-        Navigator.pop(context, {'added': true});
+        Navigator.pop(context, {'updated': true});
       }, error: (err){
         setState(() => isSubmit = false );
         onError(context, response: err);
       });
-
 
     }
   }
@@ -52,39 +51,41 @@ class _FormEditStockState extends State<FormEditHarga> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: Wh.appBar(context, title: 'Edit Stock'),
+    return Unfocus(
+      child: Scaffold(
+        appBar: Wh.appBar(context, title: 'Edit Stock'),
 
-      body: Column(
-        children: <Widget>[
+        body: Column(
+          children: <Widget>[
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(15),
-              child: Column(
-                children: <Widget>[
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  children: <Widget>[
 
-                  TextInput(
-                    label: 'Harga', controller: price,
-                    hint: 'Inputkan harga',
-                  )
-                ],
+                    TextInput(
+                      label: 'Harga', controller: price,
+                      hint: 'Inputkan harga',
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
 
-          Container(
-            padding: EdgeInsets.all(15),
-            child: Button( isSubmit: isSubmit,
-              onTap: (){ submit(); },
-              text: 'Simpan',
+            Container(
+              padding: EdgeInsets.all(15),
+              child: Button( isSubmit: isSubmit,
+                onTap: (){ submit(); },
+                text: 'Simpan',
+              )
             )
-          )
-        ],
-      )
-      
-      
-      
+          ],
+        )
+        
+        
+        
+      ),
     );
   }
 }
