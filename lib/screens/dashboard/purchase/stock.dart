@@ -1,4 +1,5 @@
 import 'package:dagink/screens/dashboard/purchase/detail-stock.dart';
+import 'package:dagink/screens/dashboard/purchase/forms/form-edit-harga.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ class _StockState extends State<Stock> {
   bool loading = false;
   List purchases = [], filter = [];
 
+  int qty = 0, pcs = 0;
+
   getData() async{
     setState(() {
       loading = true;
@@ -27,6 +30,13 @@ class _StockState extends State<Stock> {
     Http.get('stocks/'+uid, then: (_, data){
       Map res = decode(data);
       purchases = filter = res['data'];
+
+      for (var i = 0; i < purchases.length; i++) {
+        var item = purchases[i];
+
+        qty += int.parse(item['stock_qty']);
+        pcs += int.parse(item['stock_pcs']);
+      }
 
       setState(() => loading = false );
     }, error: (err){
@@ -59,84 +69,125 @@ class _StockState extends State<Stock> {
           ),
         )
       ) :
-      
-       ListView.builder(
-        itemCount: filter.length,
-        itemBuilder: (BuildContext context, i){
-          var data = filter[i];
 
-          return WidSplash(
-            padding: EdgeInsets.all(15),
-            color: i % 2 == 0 ? TColor.silver() : Colors.white,
-            onTap: (){
-              Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => DetailStock(data: data)));
-            },
-            onLongPress: (){
-              Wh.options(widget.ctx, options: ['Edit Harga'], icons: [Ln.edit()], then: (res){
+      Column(
+        children: [
 
-              });
-            },
-            child: Container(
-              child: Row(
-                children: <Widget>[
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async{  getData();  },
+              child: ListView.builder(
+                itemCount: filter.length,
+                itemBuilder: (BuildContext context, i){
+                  var data = filter[i];
 
-                  data['image'] == 'default.png' ?
+                  return WidSplash(
+                    padding: EdgeInsets.all(15),
+                    color: i % 2 == 0 ? TColor.silver() : Colors.white,
+                    onTap: (){
+                      Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => DetailStock(data: data)));
+                    },
+                    onLongPress: (){
+                      Wh.options(widget.ctx, options: ['Edit Harga'], icons: [Ln.edit()], then: (res){
+                        switch (res) {
+                          case 0:
+                            Navigator.pop(widget.ctx);
+                            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormEditHarga(data)));
+                            
+                            break;
+                          default:
+                        }
+                      });
+                    },
+                    child: Container(
+                      child: Row(
+                        children: <Widget>[
 
-                  Container(
-                    margin: EdgeInsets.only(right: 10),
-                    width: 50, height: 50,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/img/no-img.png')
-                      )
-                    ),
-                  ) :
+                          data['image'] == 'default.png' ?
 
-                  Container(
-                    margin: EdgeInsets.only(right: 10),
-                    child: FadeInImage.assetNetwork(
-                      height: 50, width: 50,
-                      placeholder: 'assets/img/no-img.png',
-                      image: Http.baseUrl(url: 'product_image/'+data['image']),
-                    ),
-                  ),
+                          Container(
+                            margin: EdgeInsets.only(right: 10),
+                            width: 50, height: 50,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('assets/img/no-img.png')
+                              )
+                            ),
+                          ) :
 
-                  Flexible(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              text(ucwords(data['name']), bold: true, overflow: TextOverflow.ellipsis),
-                              text(data['code'])
-                            ],
+                          Container(
+                            margin: EdgeInsets.only(right: 10),
+                            child: FadeInImage.assetNetwork(
+                              height: 50, width: 50,
+                              placeholder: 'assets/img/no-img.png',
+                              image: Http.baseUrl(url: 'product_image/'+data['image']),
+                            ),
                           ),
-                        ),
 
-                        Container(
-                          margin: EdgeInsets.only(left: 15),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: <Widget>[
-                              text(data['stock_qty']+' / '+data['stock_pcs'], bold: true),
-                            ],
+                          Flexible(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      text(data['code']+' - '+ucwords(data['name']), bold: true),
+                                      text(nformat(data['sale_price']))
+                                    ],
+                                  ),
+                                ),
+
+                                Container(
+                                  margin: EdgeInsets.only(left: 15),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: <Widget>[
+                                      text(data['stock_qty']+' / '+data['stock_pcs'], bold: true),
+                                    ],
+                                  )
+                                )
+                              ],
+                            ),
                           )
-                        )
-                      ],
-                    ),
-                  )
 
-                  
+                          
+                        ],
+                      ),
+                    ),
+                  );
+                },
+            ),
+            ),
+          ),
+
+          Container(
+            padding: EdgeInsets.all(15),
+            child: Container(
+              padding: EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
+              width: Mquery.width(context),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(3),
+                color: TColor.azure()
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  text('Total Stock', color: Colors.white, bold: true),
+                  text(qty.toString()+'/'+pcs.toString(), color: Colors.white, bold: true)
                 ],
               ),
-            ),
-          );
-        },
-      ),
+            )
+          )
+    
+
+
+        ]
+      )
+      
+       
     );
   }
 }
