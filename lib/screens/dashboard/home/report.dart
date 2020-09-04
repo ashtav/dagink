@@ -27,10 +27,10 @@ class _BalanceHistoriesState extends State<Report> {
       values = [];
       
       // achivements = res['data'];
-      List keys = ['toko','invoice','grand_total','discount','net_sales','modal','profit'];
+      // List keys = ['toko','invoice','grand_total','discount','net_sales','modal','profit'];
 
       res.forEach((key, value) {
-        values.add(res[key]);
+        values.add(nformat(res[key]));
       });
 
       setState(() => loading = false );

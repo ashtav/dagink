@@ -21,7 +21,7 @@ class _FormItemState extends State<FormItem> {
   var rsp = TextEditingController();
 
   String productId;
-  var dataProduct, subtotal = 0.0;
+  var dataProduct, subtotal = 0.0, stock;
 
   _save() async{ //removePrefs(list: ['items']);
     if(productId == null || qty.text.isEmpty && pcs.text.isEmpty || salesPrice.text.isEmpty || qty.text == '0' && pcs.text == '0'){
@@ -99,7 +99,7 @@ class _FormItemState extends State<FormItem> {
                 children: [
 
                   SelectInput(
-                    label: 'Pilih Barang', hint: 'Pilih barang',
+                    label: 'Pilih Barang', hint: 'Pilih barang', sublabel: stock,
                     controller: product, select: (){
                       modal(widget.ctx, child: ListProduct(), then: (res){
                         if(res != null){
@@ -110,6 +110,8 @@ class _FormItemState extends State<FormItem> {
                             product.text = res['name'];
                             salesPrice.text = res['sale_price'].toString();
                             rsp.text = res['recommended_sale_price'].toString();
+
+                            stock = res['stock_qty'].toString()+' / '+res['stock_pcs'].toString();
                           });
                         }
                       });

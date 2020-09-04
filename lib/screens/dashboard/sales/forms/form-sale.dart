@@ -23,6 +23,8 @@ class _FormSaleState extends State<FormSale> {
     if(storeId == null){
       Wh.toast('Anda belum memilih toko');
     }else{
+      removePrefs(list: ['items']);
+      
       var formData = {
         'store_id': storeId,
         'store': store.text,

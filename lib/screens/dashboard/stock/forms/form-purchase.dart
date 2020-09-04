@@ -1,4 +1,4 @@
-import 'package:dagink/screens/dashboard/purchase/forms/save-purchase.dart';
+import 'package:dagink/screens/dashboard/stock/forms/save-purchase.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';

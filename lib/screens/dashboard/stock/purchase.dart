@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:dagink/screens/dashboard/purchase/cart.dart';
-import 'package:dagink/screens/dashboard/purchase/forms/form-purchase.dart';
-import 'package:dagink/screens/dashboard/purchase/purchase-history.dart';
-import 'package:dagink/screens/dashboard/purchase/purchase-order.dart';
-import 'package:dagink/screens/dashboard/purchase/stock.dart';
+import 'package:dagink/screens/dashboard/stock/cart.dart';
+import 'package:dagink/screens/dashboard/stock/forms/form-purchase.dart';
+import 'package:dagink/screens/dashboard/stock/purchase-history.dart';
+import 'package:dagink/screens/dashboard/stock/purchase-order.dart';
+import 'package:dagink/screens/dashboard/stock/stock.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class Purchase extends StatefulWidget {
 
 class _PurchaseState extends State<Purchase> {
 
-  bool loading = false;
+  bool loading = false, isCartEmpty = true;
   List purchases = [], filter = [];
 
   int tab = 0;
@@ -28,21 +28,11 @@ class _PurchaseState extends State<Purchase> {
   var keyword = TextEditingController();
 
   getData() async{
-    setState(() {
-      loading = true;
-      keyword.clear();
-    });
-
-    String uid = await Auth.id();
-
-    Http.get('purchase?created_by='+uid, then: (_, data){
-      Map res = decode(data);
-      purchases = filter = res['data'];
-
-      setState(() => loading = false );
-    }, error: (err){
-      setState(() => loading = false );
-      onError(context, response: err, popup: true);
+    // get cart data
+    getPrefs('order', dec: true).then((res){ print(res);
+      setState(() {
+        isCartEmpty = res == null;
+      });
     });
   }
 
@@ -50,17 +40,19 @@ class _PurchaseState extends State<Purchase> {
 
   @override
   void initState() {
+    getData();
+
     super.initState(); tabContent = tab == 0 ? PurchaseOrder(widget.ctx) : PurchaseHistory(widget.ctx);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Wh.appBar(context, title: 'Pembelian', elevation: 0, back: false, center: true, actions: [
+      appBar: Wh.appBar(context, title: 'Pembelian', elevation: 0, center: true, actions: [
         IconButton(
-          icon: loading ? Wh.spiner() : Icon(Ln.sortNumeric()),
+          icon: loading ? Wh.spiner() : Icon(Ln.wallet()),
           onPressed: loading ? null : (){
-            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Stock(widget.ctx)));
+            Wh.dialog(context, child: InfoSaldo());
           },
         ),
 
@@ -70,11 +62,13 @@ class _PurchaseState extends State<Purchase> {
               Icon(Ln.cart()),
 
               Positioned(
-                child: Container(
-                  width: 10, height: 10,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Colors.red
+                child: isCartEmpty ? SizedBox.shrink() : ZoomIn(
+                  child: Container(
+                    width: 10, height: 10,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.red
+                    ),
                   ),
                 ),
               )
@@ -95,6 +89,8 @@ class _PurchaseState extends State<Purchase> {
                   });
                 }
               }
+            }).then((value){
+              getData();
             });
           },
         ),
@@ -148,7 +144,7 @@ class _PurchaseState extends State<Purchase> {
        
       floatingActionButton: FloatingActionButton(
         heroTag: 'purchase',
-        child: Icon(Ln.bag()),
+        child: Icon(Ln.plus()),
         onPressed: (){
           Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormPurchase(widget.ctx))).then((value){
             if(value != null){
@@ -162,8 +158,65 @@ class _PurchaseState extends State<Purchase> {
                 });
               }
             }
-          });
+          }).then((value) => getData());
         },
+      ),
+    );
+  }
+}
+
+class InfoSaldo extends StatefulWidget {
+  @override
+  _InfoSaldoState createState() => _InfoSaldoState();
+}
+
+class _InfoSaldoState extends State<InfoSaldo> {
+
+  Map user = {};
+
+  initAuth() async{
+    var auth = await Auth.user();
+    setState(() {
+      user = auth;
+    });
+  }
+
+  @override
+  void initState() {
+    initAuth();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: TColor.azure(), width: 2),
+                  borderRadius: BorderRadius.circular(2)
+                ),
+                margin: EdgeInsets.only(right: 13),
+                padding: EdgeInsets.all(7),
+                child: Icon(Ln.wallet(), size: 25, color: TColor.azure())
+              ),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  text('Informasi Saldo'),
+                  text('Rp '+Cur.rupiah(user['balance']), size: 20, bold: true, color: TColor.azure()),
+                ],
+              )
+
+            ],
+          )
+        ],
       ),
     );
   }

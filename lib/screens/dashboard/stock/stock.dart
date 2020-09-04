@@ -1,5 +1,6 @@
-import 'package:dagink/screens/dashboard/purchase/detail-stock.dart';
-import 'package:dagink/screens/dashboard/purchase/forms/form-edit-harga.dart';
+import 'package:dagink/screens/dashboard/stock/detail-stock.dart';
+import 'package:dagink/screens/dashboard/stock/forms/form-edit-harga.dart';
+import 'package:dagink/screens/dashboard/stock/purchase.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class _StockState extends State<Stock> {
         qty += int.parse(item['stock_qty']);
         pcs += int.parse(item['stock_pcs']);
 
-        print(item['sale_price'].runtimeType);
+        // print(item['sale_price'].runtimeType);
 
         totalValue += item['sale_price'];
       }
@@ -58,7 +59,14 @@ class _StockState extends State<Stock> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Wh.appBar(context, title: 'Stock Saya', center: true),
+      appBar: Wh.appBar(context, title: 'Stock Saya', center: true, back: false, actions: [
+        IconButton(
+          icon: Icon(Ln.bag()),
+          onPressed: (){
+            Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Purchase(widget.ctx)));
+          },
+        )
+      ]),
 
       body: loading ? ListSkeleton(length: 15,) : filter.length == 0 ?
 

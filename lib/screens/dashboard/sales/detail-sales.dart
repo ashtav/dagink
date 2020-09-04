@@ -221,15 +221,18 @@ class PrintSales {
     bluetooth.isConnected.then((isConnected) async{
       if(isConnected){
 
-        List detail = data['details']; print(detail);
+        var auth = await Auth.user();
 
-        bluetooth.printCustom("PT. KEMBAR PUTRA MAKMUR",1,1);
-        bluetooth.printCustom("Jl. Anggrek I No. 1, Kapal, Mengwi, Badung",0,1);
-        bluetooth.printCustom("(0361) 9006481 | www.kembarputra.com",0,1);
+        List detail = data['details']; print(auth); print(data);
+
+        bluetooth.printCustom(auth['name'],1,1);
+        bluetooth.printCustom(auth['phone'],0,1);
+        bluetooth.printCustom(auth['email'],0,1);
 
         bluetooth.printCustom("------------------------------------------",0,1);
-
-        bluetooth.printLeftRight('Kode : '+data['code'].toString(), '     Tgl. '+data['transaction_date'],0);
+ 
+        bluetooth.printCustom('No. Invoice : '+data['code'].toString(),0,0);
+        bluetooth.printCustom('Tgl. '+data['transaction_date'],0,0);
         bluetooth.printCustom('Kode Toko : '+data['store_code'].toString(),0,0);
         bluetooth.printCustom('Penjual : '+data['name'],0,0);
         bluetooth.printCustom("------------------------------------------",0,1);
@@ -251,9 +254,10 @@ class PrintSales {
         bluetooth.printLeftRight('Grand Total : ', Cur.rupiah(grandTotal), 0);
 
         bluetooth.printNewLine();
-        bluetooth.printCustom('Harga sudah termasuk PPN',0,1);
         bluetooth.printCustom('--== Terima Kasih ==--',0,1);
+        bluetooth.printCustom('Dicetak tanggal '+Dt.dateTime(),0,1);
         bluetooth.printNewLine();
+        bluetooth.printCustom('Powered by PT. Jangkar Teknologi Indonesia',0,1);
         bluetooth.printNewLine();
         bluetooth.printNewLine();
         bluetooth.paperCut();

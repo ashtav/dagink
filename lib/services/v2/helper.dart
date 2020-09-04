@@ -2076,9 +2076,9 @@ class Api {
 }
 
 class SelectInput extends StatefulWidget {
-  SelectInput({this.label, this.hint, this.select, @required this.controller, this.enabled: true, this.suffix});
+  SelectInput({this.label, this.hint, this.select, @required this.controller, this.enabled: true, this.suffix, this.sublabel});
 
-  final String label, hint;
+  final String label, hint, sublabel;
   final Function select;
   final TextEditingController controller;
   final bool enabled;
@@ -2100,7 +2100,13 @@ class _SelectInputState extends State<SelectInput> {
           widget.label == null ? SizedBox.shrink() :
           Container(
             margin: EdgeInsets.only(bottom: 7),
-            child: text(widget.label, bold: true),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                text(widget.label, bold: true),
+                text(widget.sublabel ?? '')
+              ],
+            )
           ),
 
           WidSplash(
@@ -2246,7 +2252,7 @@ class _TextinputState extends State<TextInput> {
           ),
 
           Container(
-            color: widget.enabled ? Colors.white : Color.fromRGBO(232, 236, 241, 1), height: 40,
+            color: widget.enabled ? Colors.white : Color.fromRGBO(232, 236, 241, 1), height: widget.maxLines == null ? 40 : null,
             child: TextField(
               controller: widget.controller,
               keyboardType: widget.type,

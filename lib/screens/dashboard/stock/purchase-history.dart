@@ -1,4 +1,4 @@
-import 'package:dagink/screens/dashboard/purchase/detail-purchase.dart';
+import 'package:dagink/screens/dashboard/stock/detail-purchase.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +78,7 @@ class _PurchaseOrderState extends State<PurchaseHistory> {
         getData();
       },
       child: ListView.builder(
+        padding: EdgeInsets.only(bottom: 70),
         itemCount: filter.length,
         itemBuilder: (BuildContext context, i){
           var data = filter[i];

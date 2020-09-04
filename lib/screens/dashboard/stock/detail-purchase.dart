@@ -16,7 +16,7 @@ class _DetailPurchaseState extends State<DetailPurchase> {
   List items = [];
 
   bool loading = true;
-  int grandTotal = 0, qty = 0, pcs = 0;
+  int grandTotal = 0, qty = 0, pcs = 0, viewPrice = 0;
 
   getData(){
     Http.get('purchase/'+widget.data['id'].toString(), then: (_, data){
@@ -37,7 +37,6 @@ class _DetailPurchaseState extends State<DetailPurchase> {
       onError(context, response: err, popup: true);
     });
   }
-
 
 
   @override
@@ -73,39 +72,44 @@ class _DetailPurchaseState extends State<DetailPurchase> {
               child: ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (BuildContext context, i){
-                  var data = items[i];
+                  var data = items[i]; print(data);
 
-                  return Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: i % 2 == 0 ? TColor.silver() : Colors.white
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
+                  return WidSplash(
+                    onTap: (){
+                      setState(() {
+                        viewPrice = data['id'] == viewPrice ? 0 : data['id'];
+                      });
+                    },
+                    color: i % 2 == 0 ? TColor.silver() : Colors.white,
+                    child: Container(
+                      padding: EdgeInsets.all(15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
 
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              text(data['product']['code'], bold: true),
-                              text(data['product']['name']),
-                            ],
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                text(data['product']['code'], bold: true),
+                                text(data['product']['name']),
+                              ],
+                            ),
                           ),
-                        ),
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            text(nformat(data['price'])),
-                            text(data['qty_approve'].toString()+' / '+data['qty_pcs_approve'].toString())
-                          ]
-                        )
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              text(viewPrice == data['id'] ? '@'+nformat(data['price']) : 'subtotal'),
+                              text(data['qty_approve'].toString()+' / '+data['qty_pcs_approve'].toString())
+                            ]
+                          )
 
 
-                      ],
-                    )
-                    
+                        ],
+                      )
+                      
+                    ),
                   );
                 }
               )

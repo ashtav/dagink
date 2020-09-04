@@ -169,7 +169,12 @@ class _CartState extends State<Cart> {
                             carts.removeWhere((item) => item['product_id'] == data['product_id']);
                             initData(carts);
 
-                            setPrefs('order', carts, enc: true);
+                            if(carts.length == 0){
+                              removePrefs(list: ['order']);
+                            }else{
+                              setPrefs('order', carts, enc: true);
+                            }
+
                           });
                           break;
                       }

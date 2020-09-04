@@ -16,7 +16,9 @@ class _FormStoreState extends State<FormStore> {
   var name = new TextEditingController(),
       owner = new TextEditingController(),
       phone = new TextEditingController(),
-      remark = new TextEditingController(),
+      regencyId = new TextEditingController(),
+      districtId = new TextEditingController(),
+      urbanVillageId = new TextEditingController(),
       zipCode = new TextEditingController(),
       address = new TextEditingController();
 
@@ -26,8 +28,7 @@ class _FormStoreState extends State<FormStore> {
 
   FocusNode nameNode = FocusNode(), 
             ownerNode = FocusNode(), 
-            phoneNode = FocusNode(),
-            keteranganNode = FocusNode();
+            phoneNode = FocusNode();
 
   var regencies = [], districts = [], urbans = [];
 
@@ -97,18 +98,6 @@ class _FormStoreState extends State<FormStore> {
   }
 
   submit() async{
-    var locationEnabled = await Gps.enabled();
-    if(!locationEnabled){
-      Wh.toast('Aktifkan gps');
-      return;
-    }
-
-    if(name.text.isEmpty || owner.text.isEmpty || phone.text.isEmpty){
-      Wh.toast('Lengkapi form'); return;
-    }
-
-    await autoLocation(init: true);
-
     setState(() {
       isSubmit = true;
     });
@@ -121,12 +110,11 @@ class _FormStoreState extends State<FormStore> {
       'phone': phone.text,
       'latitude': gps.latitude.toString(),
       'longitude': gps.longitude.toString(),
-      'regency': regency.text,
-      'district': district.text,
-      'urban_village': urban.text,
+      'regency_id': regencyId.text,
+      'district_id': districtId.text,
+      'urban_village_id': urbanVillageId.text,
       'zip_code': zipCode.text,
-      'address': address.text,
-      'remark': remark.text
+      'address': address.text
     };
 
     if(widget.initData == null){
@@ -140,7 +128,7 @@ class _FormStoreState extends State<FormStore> {
     }else{
       formData['code'] = widget.initData['code'];
 
-      Http.put('store/'+widget.initData['id'].toString(), debug: true, data: formData, then: (_, data){
+      Http.put('store/'+widget.initData['id'].toString(), data: formData, then: (_, data){
         Wh.toast('Berhasil diperbarui');
         Navigator.pop(context, {'updated': true, 'data': formData});
       }, error: (err){
@@ -153,17 +141,30 @@ class _FormStoreState extends State<FormStore> {
   initForm(){
     var data = widget.initData;
     if(data != null){
-      
+      print(data);
+      // set input
       name.text = data['name'];
       owner.text = data['owner'];
       phone.text = data['phone'];
       address.text = data['address'];
       zipCode.text = data['zip_code'];
-      remark.text = data['remark'];
 
-      regency.text = data['regency'];
-      district.text = data['district'];
-      urban.text = data['urban_village'];
+      String regId = data['regency']['id'].toString();
+
+      regencyId.text = regId;
+      regency.text = data['regency']['name'];
+
+      String disId = data['district']['id'].toString();
+
+      getDistrict(regId);
+      districtId.text = data['district']['id'].toString();
+      district.text = data['district']['name'];
+
+      String urbId = data['urban_village']['id'].toString();
+
+      getUrban(disId);
+      urbanVillageId.text = urbId;
+      urban.text = data['urban_village']['name'];
     }
   }
 
@@ -172,18 +173,8 @@ class _FormStoreState extends State<FormStore> {
                               
     if(init) if(locationEnabled){
       var location = await Gps.location();
-
-      setState(() {
-
-        address.text = location.thoroughfare+', '+location.subLocality+', '+location.locality+' '+location.subAdministrativeArea+', '+location.administrativeArea+', '+location.postalCode;
-        zipCode.text = location.postalCode;
-
-        regency.text = location.subAdministrativeArea;
-        district.text = location.locality;
-        urban.text = location.subLocality;
-
-      });
-
+      address.text = location.thoroughfare+', '+location.subLocality+', '+location.locality+' '+location.subAdministrativeArea+', '+location.administrativeArea;
+      zipCode.text = location.postalCode;
     }else{
       Wh.toast('Aktifkan gps Anda');
     }
@@ -192,7 +183,7 @@ class _FormStoreState extends State<FormStore> {
   @override
   void initState() {
     super.initState();
-    autoLocation(); initForm();
+    getRegency(); autoLocation(init: widget.initData == null);
   }
 
   @override
@@ -201,9 +192,9 @@ class _FormStoreState extends State<FormStore> {
       child: Scaffold(
         appBar: Wh.appBar(context, title: widget.initData == null ? 'Tambah Toko' : 'Edit Toko', center: true, actions: [
           IconButton(
-            icon: request ? Wh.spiner() : Icon(Ln.mapMarked()),
+            icon: request ? Wh.spiner() : Icon(Ln.refresh()),
             onPressed: request ? null : (){
-              autoLocation();
+              getRegency();
             },
           )
         ]),
@@ -227,51 +218,55 @@ class _FormStoreState extends State<FormStore> {
                         ),
 
                         TextInput(
-                          label: 'Nomor Telepon', hint: 'Nomor telepon', controller: phone, type: TextInputType.datetime, length: 15, node: phoneNode, action: TextInputAction.next, submit: (String _){ focus(context, keteranganNode); },
+                          label: 'Nomor Telepon', hint: 'Nomor telepon', controller: phone, type: TextInputType.datetime, length: 15, node: phoneNode,
+                        ),
+
+                        SelectCupertino(
+                          label: 'Kabupaten', controller: regency,
+                          hint: 'Pilih kabupaten', enabled: regencies.length > 0,
+                          options: regencies.map((i) => i['name']).toList(),
+                          values: regencies.map((i) => i['id']).toList(),
+                          select: (res){
+                            regencyId.text = res['value'];
+                            getDistrict(res['value']);
+                          },
+                        ),
+
+                        SelectCupertino(
+                          label: 'Kecamatan', controller: district,
+                          hint: 'Pilih kecamatan', enabled: districts.length > 0,
+                          options: districts.map((i) => i['name']).toList(),
+                          values: districts.map((i) => i['id']).toList(),
+                          select: (res){
+                            districtId.text = res['value'];
+                            getUrban(res['value']);
+                          },
+                        ),
+
+                        SelectCupertino(
+                          label: 'Kelurahan', controller: urban,
+                          hint: 'Pilih kelurahan', enabled: urbans.length > 0,
+                          options: urbans.map((i) => i['name']).toList(),
+                          values: urbans.map((i) => i['id']).toList(),
+                          select: (res){
+                            urbanVillageId.text = res['value'];
+                          },
                         ),
 
                         TextInput(
-                          label: 'Keterangan', hint: 'Keterangan', controller: remark, maxLines: 3, node: keteranganNode,
-                        ),
-
-                        Container(
-                          margin: EdgeInsets.only(bottom: 10),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
-                                child: Icon(Ln.mapMarked()),
-                              ),
-
-                              Flexible(
-                                child: text(address.text, bold: true)
-                              )
-                            ],
+                          label: 'Alamat', hint: 'Inputkan alamat', controller: address, suffix: WidSplash(
+                            child: Icon(Ln.mapMarked()),
+                            onTap: () async {
+                              autoLocation();
+                            },
                           ),
                         ),
 
-                        Container(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
-                                child: Icon(Ln.infoCircle()),
-                              ),
-
-                              Flexible(
-                                child: text('Lokasi seperti kabupaten, kecamatan, kelurahan dan lainnya diset secara otomatis berdasarkan tempat dimana Anda berada.')
-                              )
-                            ],
-                          ),
+                        TextInput(
+                          label: 'Kode Pos', hint: 'Kode pos', controller: zipCode, type: TextInputType.datetime, length: 5,
                         ),
 
-                        // TextInput(label: 'Kabupaten', controller: regency, enabled: false),
-                        // TextInput(label: 'Kecamatan', controller: district, enabled: false),
-                        // TextInput(label: 'Kelurahan', controller: urban, enabled: false),
-                        // TextInput(label: 'Alamat', controller: address, enabled: false),
-                        // TextInput(label: 'Kode Pos', enabled: false, controller: zipCode),
+
 
                       ],
                     ),
