@@ -4,7 +4,6 @@ import 'package:dagink/screens/dashboard/stock/cart.dart';
 import 'package:dagink/screens/dashboard/stock/forms/form-purchase.dart';
 import 'package:dagink/screens/dashboard/stock/purchase-history.dart';
 import 'package:dagink/screens/dashboard/stock/purchase-order.dart';
-import 'package:dagink/screens/dashboard/stock/stock.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';

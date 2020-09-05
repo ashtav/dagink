@@ -28,6 +28,7 @@ class _DetailPurchaseState extends State<DetailPurchase> {
 
         for (var i = 0; i < items.length; i++) {
           grandTotal += items[i]['price'];
+
           qty += items[i]['qty_approve'];
           pcs += items[i]['qty_pcs_approve'];
         }
@@ -91,8 +92,8 @@ class _DetailPurchaseState extends State<DetailPurchase> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                text(data['product']['code'], bold: true),
-                                text(data['product']['name']),
+                                text(data['product_code'], bold: true),
+                                text(data['product_name']),
                               ],
                             ),
                           ),
@@ -100,7 +101,7 @@ class _DetailPurchaseState extends State<DetailPurchase> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              text(viewPrice == data['id'] ? '@'+nformat(data['price']) : 'subtotal'),
+                              text(viewPrice == data['id'] ? '@'+nformat(data['price']) : nformat(data['subtotal_approve'])),
                               text(data['qty_approve'].toString()+' / '+data['qty_pcs_approve'].toString())
                             ]
                           )

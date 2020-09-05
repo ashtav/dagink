@@ -13,6 +13,8 @@ class _SettingAccountState extends State<SettingAccount> {
       password = TextEditingController(),
       passConf = TextEditingController();
 
+  var passNode = FocusNode();
+
   bool isSubmit = false;
 
   initAccount() async{
@@ -35,6 +37,15 @@ class _SettingAccountState extends State<SettingAccount> {
     setState(() {
       isSubmit = true;
     });
+
+    String uid = await Auth.id();
+
+    Http.put('user/'+uid+'/change_password', data: {'password': password.text, 'password_confirmation': passConf.text}, then: (_, data){
+      Navigator.pop(context, {'success': true});
+    }, error: (err){
+      setState(() => isSubmit = false );
+      onError(context, response: err, popup: true);
+    });
   }
 
   @override
@@ -56,19 +67,21 @@ class _SettingAccountState extends State<SettingAccount> {
               child: Column(
                 children: [
 
-                  TextInput(
-                    label: 'Email', hint: 'Inputkan email',
-                    controller: email,
-                  ),
+                  // TextInput(
+                  //   label: 'Email', hint: 'Inputkan email',
+                  //   controller: email,
+                  // ),
 
                   TextInput(
                     label: 'Password', hint: 'Inputkan password',
-                    controller: password, obsecure: true,
+                    controller: password, obsecure: true, action: TextInputAction.next, submit: (String s){
+                      focus(context, passNode);
+                    },
                   ),
 
                   TextInput(
                     label: 'Konfirmasi Password', hint: 'Inputkan konfirmasi password',
-                    controller: passConf, obsecure: true,
+                    controller: passConf, obsecure: true, node: passNode,
                   )
 
                 ]
