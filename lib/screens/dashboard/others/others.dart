@@ -23,6 +23,8 @@ class _OthersState extends State<Others> {
   initAuth() async{
     var auth = await Auth.user();
     user = auth;
+
+    print(auth);
   }
 
   @override
@@ -79,8 +81,7 @@ class _OthersState extends State<Others> {
         onRefresh: () async {
           getProfile();
         },
-        child: SingleChildScrollView(
-          child: Column(
+        child: ListView(
             children: [
 
               Container(
@@ -104,7 +105,12 @@ class _OthersState extends State<Others> {
                               image: DecorationImage(
                                 image: AssetImage('assets/img/profile.png')
                               )
-                            )
+                            ),
+                            // child: FadeInImage.assetNetwork(
+                            //   height: 50, width: 50,
+                            //   placeholder: 'assets/img/no-img.png',
+                            //   image: apii+'images/items/'+data['gambar'],
+                            // ),
                           ),
 
                           Column(
@@ -286,7 +292,6 @@ class _OthersState extends State<Others> {
 
             ]
           ),
-        ),
       ),
     );
   }

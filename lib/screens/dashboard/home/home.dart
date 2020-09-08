@@ -1,3 +1,4 @@
+import 'package:dagink/components/components.dart';
 import 'package:dagink/screens/dashboard/home/achievement.dart';
 import 'package:dagink/screens/dashboard/home/report.dart';
 import 'package:dagink/services/v2/helper.dart';
@@ -15,7 +16,17 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  bool isLoadAchievement = true;
+  bool isLoadAchievement = true, loading = false;
+
+  var user = {};
+
+  initAuth() async{
+    var auth = await Auth.user();
+
+    setState(() {
+      user = auth;
+    });
+  }
 
   getAchievement() async{
     Http.get('user/program/achievement', then: (_, data){
@@ -29,9 +40,30 @@ class _HomeState extends State<Home> {
     });
   }
 
+  getProfile() async{
+    setState(() => loading = true );
+
+    var auth = await Auth.user();
+    print(auth.runtimeType);
+
+    Http.get('me', then: (_, data) async{
+      setState(() => loading = false );
+
+      setPrefs('user', data);
+
+      setState(() {
+        loading = false;
+        user = decode(data);
+      });
+    }, error: (err){
+      setState(() => loading = false );
+      onError(context, response: err);
+    });
+  }
+
   @override
   void initState() {
-    super.initState(); //getAchievement();
+    super.initState(); initAuth();
   }
 
   @override
@@ -40,128 +72,144 @@ class _HomeState extends State<Home> {
       backgroundColor: TColor.silver(),
       appBar: Wh.appBar(context, title: 'Home', center: true, back: false),
 
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+      body: RefreshIndicator(
+        onRefresh: () async{
+          getProfile();
+        },
+        child: ListView(
+          children: [
+            
 
-            Container(
-              padding: EdgeInsets.only(top: 15, left: 15, right: 15),
-              child: Container(
-                padding: EdgeInsets.all(10), width: Mquery.width(context),
+              Alert(
+                text('Selamat datang di Dagink', 
+                color: Colors.white), color: TColor.azure(), 
+                icon: Icon(Ln.smile(), color: Colors.white),
+              ),
+
+              Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: TColor.azure(),
-                  // border: Border.all(color: Color.fromRGBO(70, 127, 207, 1))
+                  color: Colors.white,
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(3)
                 ),
+                margin: EdgeInsets.all(15),
+                padding: EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(right: 10),
+                          child: loading ? Wh.spiner() : Icon(Ln.wallet())
+                        ),
+
+                        text(nformat(user['balance'] ?? 0), size: 20, bold: true)
+                      ],
+                    ),
+                    text('Jumlah saldo Anda saat ini', color: Colors.black38)
+                  ],
+                ),
+              ),
+             
+
+              Container(
+                padding: EdgeInsets.only(left: 15, right: 15),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    text('Selamat datang di Dagink', color: Colors.white),
-                    Icon(Ln.smile(), color: Colors.white)
-                  ],
-                )
-                
-              ),
-            ),
+                    Column(
+                      children: List.generate(2, (i) {
+                        List heights = [130.0, 130.0],
+                              labels = ['Point','Laporan'],
+                              values = ['?','*'];
 
-            Container(
-              padding: EdgeInsets.all(15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Column(
-                    children: List.generate(3, (i) {
-                      List heights = [120.0, 130.0, 116.0],
-                            labels = ['Saldo','Point','Laporan'],
-                            values = ['-', '?','*'];
+                        return Container(
+                            margin: EdgeInsets.all(2),
+                            height: heights[i],
+                            width: Mquery.width(context) / 2 - 19,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black12),
+                              borderRadius: BorderRadius.circular(3)
+                            ),
+                            child: WidSplash(
+                              padding: EdgeInsets.all(15),
+                              color: Colors.white,
+                              onTap: (){
+                                switch (i) {
+                                  case 0: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Achievement(widget.ctx))); break;
+                                  default: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Report(widget.ctx))); break;
+                                }
+                                
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  text(labels[i]),
 
-                      return Container(
-                          margin: EdgeInsets.all(2),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Center(
+                                          child: values[i] == '*' ? Icon(Ln.doc(), size: 35) : text(values[i], size: 35, bold: true),
+                                        )
+                                      ]
+                                    )
+                                  )
+                                  
+                                ]
+                              ),
+                            )
+                            
+                        );
+                      })
+                    ),
+
+                    Column(
+                      children: List.generate(2, (i) {
+                        List heights = [130.0, 130.0],
+                            labels = ['Pembelian','Penjualan'],
+                            values = ['-','-'];
+
+
+                        return Container(
+                          padding: EdgeInsets.all(15), margin: EdgeInsets.all(2),
                           height: heights[i],
                           width: Mquery.width(context) / 2 - 19,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black12)
-                          ),
-                          child: WidSplash(
-                            padding: EdgeInsets.all(15),
                             color: Colors.white,
-                            onTap: (){
-                              switch (i) {
-                                case 0: break;
-                                case 1: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Achievement(widget.ctx))); break;
-                                default: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Report(widget.ctx))); break;
-                              }
-                              
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                text(labels[i]),
+                            border: Border.all(color: Colors.black12),
+                            borderRadius: BorderRadius.circular(3)
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              text(labels[i]),
 
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Center(
-                                        child: values[i] == '*' ? Icon(Ln.doc(), size: 35) : text(values[i], size: 35, bold: true),
-                                      )
-                                    ]
-                                  )
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Center(
+                                      child: text(values[i], size: 35, bold: true),
+                                    )
+                                  ]
                                 )
-                                
-                              ]
-                            ),
-                          )
-                          
-                      );
-                    })
-                  ),
-
-                  Column(
-                    children: List.generate(2, (i) {
-                      List heights = [140.0, 230.0],
-                          labels = ['Pembelian','Penjualan'],
-                          values = ['-','-'];
-
-
-                      return Container(
-                        padding: EdgeInsets.all(15), margin: EdgeInsets.all(2),
-                        height: heights[i],
-                        width: Mquery.width(context) / 2 - 19,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.black12)
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            text(labels[i]),
-
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Center(
-                                    child: text(values[i], size: 35, bold: true),
-                                  )
-                                ]
                               )
-                            )
-                            
-                          ]
-                        )
-                      );
-                    })
-                  )
-                ],
-              ),
-            )
+                              
+                            ]
+                          )
+                        );
+                      })
+                    )
+                  ],
+                ),
+              )
 
-          ],
-        ),
+            ],
+          ),
       )
     );
   }

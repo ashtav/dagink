@@ -1,3 +1,4 @@
+import 'package:dagink/screens/dashboard/others/form-profil.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,8 @@ class _ProfileState extends State<Profile> {
     var auth = await LocalData.get('user');
 
     setState(() {
+      values = [];
+      
       user = decode(auth) ?? {};
 
       List keys = ['identity_card','name','gender','address','phone','email','driving_license_number'];
@@ -69,7 +72,14 @@ class _ProfileState extends State<Profile> {
             Container(
               padding: EdgeInsets.all(15),
               child: Button(
-                onTap: (){ },
+                onTap: (){
+                  Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => FormProfil())).then((value){
+                    if(value != null){
+                      initProfile();
+                      Wh.toast('Data profil berhasil diperbarui');
+                    }
+                  });
+                },
                 text: 'Perbarui Data Profil',
               ),
             )

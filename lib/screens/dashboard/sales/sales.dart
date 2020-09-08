@@ -58,12 +58,12 @@ class _SalesState extends State<Sales> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Wh.appBar(context, title: 'Penjualan', back: false, center: true, actions: [
-        IconButton(
-          icon: Icon(Ln.refresh()),
-          onPressed: (){
-            getData();
-          },
-        )
+        // IconButton(
+        //   icon: Icon(Ln.refresh()),
+        //   onPressed: (){
+        //     getData();
+        //   },
+        // )
       ]),
 
       body: loading ? ListSkeleton(length: 15) : sales.length == 0 ? Wh.noData(message: 'Tidak ada data penjualan') :
