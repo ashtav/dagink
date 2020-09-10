@@ -94,7 +94,6 @@ class _FormPurchaseState extends State<FormPurchase> {
                             padding: EdgeInsets.all(15),
                             color: i % 2 == 0 ? TColor.silver() : Colors.white,
                             onTap: (){
-
                               modal(widget.ctx, wrap: true, child: ItemSelection(data: data, initData: index > -1 ? selected[index] : null), then: (res){
                                 if(res != null){
                                   int io = selected.indexWhere((item) => item['product_id'] == res['item']['product_id']);
@@ -267,6 +266,7 @@ class _ItemSelectionState extends State<ItemSelection> {
   var qty = TextEditingController(text: '0'),
       pcs = TextEditingController(text: '0');
 
+  double subtotal = 0;
   
   _add({TextEditingController controller}){
     var c = controller;
@@ -276,6 +276,8 @@ class _ItemSelectionState extends State<ItemSelection> {
     }else{
       controller.text = (int.parse(c.text) + 1).toString();
     }
+
+    _countSubtotal();
   }
 
   _min({TextEditingController controller}){
@@ -286,6 +288,19 @@ class _ItemSelectionState extends State<ItemSelection> {
     }else{
       controller.text = (int.parse(c.text) - 1).toString();
     }
+
+    _countSubtotal();
+  }
+
+  _countSubtotal(){
+    var _dus = int.parse(qty.text),
+        _pcs = int.parse(pcs.text);
+
+    var n = widget.data;
+
+    setState(() {
+      subtotal = (_dus + (_pcs / n['volume'])) * n['price'];
+    });
   }
 
   initInput(){
@@ -350,15 +365,21 @@ class _ItemSelectionState extends State<ItemSelection> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              text(ucwords(widget.data['name']), bold: true, overflow: TextOverflow.ellipsis),
-                              text(widget.data['description'])
+                              text(ucwords(widget.data['name']), bold: true),
                             ],
                           ),
                         ),
 
                         Container(
                           margin: EdgeInsets.only(left: 15),
-                          child: text(nformat(widget.data['price']), bold: true)
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              text(nformat(widget.data['price']), bold: true),
+                              text(nformat((widget.data['price'] / widget.data['volume']), fixed: 0), bold: true)
+                            ],
+                          )
+                          
                         )
                       ],
                     ),
@@ -376,7 +397,7 @@ class _ItemSelectionState extends State<ItemSelection> {
 
                   Expanded(
                     child: TextInput(
-                      hint: 'Jumlah dus', controller: qty, enabled: false, type: TextInputType.datetime, length: 11, space: 0, prefix: Container(child: text('QTY'), margin: EdgeInsets.only(right: 10),),
+                      hint: 'Jumlah dus', controller: qty, enabled: false, type: TextInputType.datetime, length: 11, space: 0, prefix: Container(child: text('DUS'), margin: EdgeInsets.only(right: 10),),
                     ),
                   ),
 
@@ -427,6 +448,11 @@ class _ItemSelectionState extends State<ItemSelection> {
 
                 ]
               )
+            ),
+
+            Container(
+              margin: EdgeInsets.only(bottom: 15),
+              child: text('Subtotal : '+nformat(subtotal, fixed: 0).toString(), bold: true),
             ),
 
             Row(
