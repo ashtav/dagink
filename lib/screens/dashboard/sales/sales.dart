@@ -17,9 +17,9 @@ import 'package:flutter/material.dart';
 */
 
 class Sales extends StatefulWidget {
-  Sales(this.ctx);
+  Sales(this.ctx, {this.isBack: false});
 
-  final ctx;
+  final ctx, isBack;
 
   @override
   _SalesState createState() => _SalesState();
@@ -57,7 +57,7 @@ class _SalesState extends State<Sales> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Wh.appBar(context, title: 'Penjualan', back: false, center: true, actions: [
+      appBar: Wh.appBar(context, title: 'Penjualan', back: widget.isBack, center: true, actions: [
         // IconButton(
         //   icon: Icon(Ln.refresh()),
         //   onPressed: (){

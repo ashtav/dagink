@@ -1,6 +1,8 @@
 import 'package:dagink/components/components.dart';
 import 'package:dagink/screens/dashboard/home/achievement.dart';
 import 'package:dagink/screens/dashboard/home/report.dart';
+import 'package:dagink/screens/dashboard/sales/sales.dart';
+import 'package:dagink/screens/dashboard/stock/purchase.dart';
 import 'package:dagink/services/v2/helper.dart';
 import 'package:dagink/services/v3/helper.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,8 @@ class _HomeState extends State<Home> {
 
   bool isLoadAchievement = true, loading = false;
 
+  int penjualanHariIni = 0, pembelianHariIni = 0;
+
   var user = {};
 
   initAuth() async{
@@ -28,23 +32,46 @@ class _HomeState extends State<Home> {
     });
   }
 
-  getAchievement() async{
-    Http.get('user/program/achievement', then: (_, data){
-      
-      print(data);
+  initHome() async{
+    setState(() => loading = true );
 
-      setState(() => isLoadAchievement = false );
+    _purchase(){
+      Http.get('purchase/get/purchase_by_date', then: (_, data){
+        Map result = decode(data);
+        penjualanHariIni = result['count'];
+
+        getProfile();
+
+      }, error: (err){
+        setState(() => loading = false );
+        onError(context, response: err);
+      });
+
+    }
+
+    Http.get('sales/get/sales_by_date', then: (_, data){
+      Map result = decode(data);
+      pembelianHariIni = result['count'];
+
+      _purchase();
+
     }, error: (err){
-      setState(() => isLoadAchievement = false );
+      setState(() => loading = false );
       onError(context, response: err);
     });
   }
 
-  getProfile() async{
-    setState(() => loading = true );
+  // getAchievement() async{
+  //   Http.get('user/program/achievement', then: (_, data){
+      
+  //     setState(() => isLoadAchievement = false );
+  //   }, error: (err){
+  //     setState(() => loading = false );
+  //     onError(context, response: err);
+  //   });
+  // }
 
-    var auth = await Auth.user();
-    print(auth.runtimeType);
+  getProfile() async{
 
     Http.get('me', then: (_, data) async{
       setState(() => loading = false );
@@ -63,7 +90,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    super.initState(); initAuth();
+    super.initState(); initHome();
   }
 
   @override
@@ -74,11 +101,10 @@ class _HomeState extends State<Home> {
 
       body: RefreshIndicator(
         onRefresh: () async{
-          getProfile();
+          initHome();
         },
         child: ListView(
           children: [
-            
 
               Alert(
                 text('Selamat datang di Dagink', 
@@ -123,7 +149,7 @@ class _HomeState extends State<Home> {
                       children: List.generate(2, (i) {
                         List heights = [130.0, 130.0],
                               labels = ['Point','Laporan'],
-                              values = ['?','*'];
+                              icons = [Ln.star(), Ln.doc()];
 
                         return Container(
                             margin: EdgeInsets.all(2),
@@ -141,7 +167,6 @@ class _HomeState extends State<Home> {
                                   case 0: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Achievement(widget.ctx))); break;
                                   default: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Report(widget.ctx))); break;
                                 }
-                                
                               },
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +178,7 @@ class _HomeState extends State<Home> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Center(
-                                          child: values[i] == '*' ? Icon(Ln.doc(), size: 35) : text(values[i], size: 35, bold: true),
+                                          child: Icon(icons[i], size: 35),
                                         )
                                       ]
                                     )
@@ -171,35 +196,43 @@ class _HomeState extends State<Home> {
                       children: List.generate(2, (i) {
                         List heights = [130.0, 130.0],
                             labels = ['Pembelian','Penjualan'],
-                            values = ['-','-'];
-
+                            values = [penjualanHariIni,pembelianHariIni];
 
                         return Container(
-                          padding: EdgeInsets.all(15), margin: EdgeInsets.all(2),
+                          margin: EdgeInsets.all(2),
                           height: heights[i],
                           width: Mquery.width(context) / 2 - 19,
                           decoration: BoxDecoration(
-                            color: Colors.white,
                             border: Border.all(color: Colors.black12),
                             borderRadius: BorderRadius.circular(3)
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              text(labels[i]),
+                          child: WidSplash(
+                            padding: EdgeInsets.all(15),
+                            color: Colors.white,
+                            onTap: (){
+                              switch (i) {
+                                case 0: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Purchase(widget.ctx))); break;
+                                default: Navigator.push(widget.ctx, MaterialPageRoute(builder: (context) => Sales(widget.ctx, isBack: true,))); break;
+                              }
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                text(labels[i]),
 
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Center(
-                                      child: text(values[i], size: 35, bold: true),
-                                    )
-                                  ]
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Center(
+                                        child: text(values[i], size: 35, bold: true),
+                                      )
+                                    ]
+                                  )
                                 )
-                              )
-                              
-                            ]
+                                
+                              ]
+                            ),
                           )
                         );
                       })

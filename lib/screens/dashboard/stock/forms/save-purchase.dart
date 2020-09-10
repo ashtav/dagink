@@ -29,7 +29,8 @@ class _SavePurchaseState extends State<SavePurchase> {
       formData.add({
         'product_id': data['product_id'].toString(),
         'qty': data['qty'].toString(),
-        'qty_pcs': data['qty_pcs'].toString()
+        'qty_pcs': data['qty_pcs'].toString(),
+        'discount': 0
       });
     }
 

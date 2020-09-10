@@ -11,8 +11,8 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
 
-  var email = TextEditingController(text: 'hehe@gmail.com'),
-      password = TextEditingController(text: '123qweqwe');
+  var email = TextEditingController(text: ''),
+      password = TextEditingController(text: '');
 
   var emailNode = FocusNode(),
       passNode = FocusNode();
@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
         }else{
           setState(() => isSubmit = true );
 
-          Http.post('login', data: {'email': email.text, 'password': password.text}, authorization: false, then: (_, data){
+          Http.post('login', debug: true, data: {'email': email.text, 'password': password.text}, authorization: false, then: (_, data){
             setState(() => isSubmit = false );
 
             var res = decode(data),
@@ -112,7 +112,11 @@ class _LoginState extends State<Login> {
                               padding: EdgeInsets.only(top: 15, bottom: 15),
                               child: text('Saya lupa password', color: TColor.azure(), align: TextAlign.right),
                               onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => ForgetPassword()));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => ForgetPassword())).then((value){
+                                  if(value != null){
+                                    Wh.alert(context, icon: Icon(Icons.check, color: Colors.green, size: 50,), message: 'Password berhasil direset, silahkan periksa pesan masuk email Anda.');
+                                  }
+                                });
                               },
                             ),
 

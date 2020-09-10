@@ -23,8 +23,6 @@ class _OthersState extends State<Others> {
   initAuth() async{
     var auth = await Auth.user();
     user = auth;
-
-    print(auth);
   }
 
   @override
@@ -53,11 +51,8 @@ class _OthersState extends State<Others> {
   getProfile() async{
     setState(() => loading = true );
 
-    var auth = await Auth.user();
-    print(auth.runtimeType);
-
     Http.get('me', then: (_, data) async{
-      setState(() => loading = false );
+      setState(() => loading = false ); print(data);
 
       setPrefs('user', data);
 
@@ -99,18 +94,24 @@ class _OthersState extends State<Others> {
                       child: Row(
                         children: <Widget>[
                           Container(
-                            height: 60, width: 60, margin: EdgeInsets.only(right: 15),
-                            decoration: BoxDecoration(
+                            margin: EdgeInsets.only(right: 15),
+                            child: ClipRRect(
                               borderRadius: BorderRadius.circular(50),
-                              image: DecorationImage(
-                                image: AssetImage('assets/img/profile.png')
-                              )
+                              child: Container(
+                                height: 60, width: 60,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(50),
+                                  image: DecorationImage(
+                                    image: AssetImage('assets/img/profile.png')
+                                  )
+                                ),
+                                child: user['avatar'] == null ? SizedBox.shrink() : FadeInImage.assetNetwork(
+                                  height: 50, width: 50,
+                                  placeholder: 'assets/img/profile.png',
+                                  image: 'https://daging-dev.bukakode.com/avatar/'+user['avatar'],
+                                ),
+                              ),
                             ),
-                            // child: FadeInImage.assetNetwork(
-                            //   height: 50, width: 50,
-                            //   placeholder: 'assets/img/no-img.png',
-                            //   image: apii+'images/items/'+data['gambar'],
-                            // ),
                           ),
 
                           Column(
@@ -213,13 +214,17 @@ class _OthersState extends State<Others> {
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(3, (i){
-                          List  labels = ['Komunitas','Bantuan','Nilai Kami'],
-                                icons = [Ln.users(),Ln.infoCircle(),Ln.star()];
+                        children: List.generate(2, (i){
+                          List  labels = ['Bantuan','Nilai Kami'],
+                                icons = [Ln.infoCircle(),Ln.star()];
 
                           return WidSplash(
                             onTap: (){
-
+                              switch (i) {
+                                case 0:
+                                  goto('https://chat.whatsapp.com/IVvxBaCaeaA9lGTbl3JBop'); break;
+                                default:
+                              }
                             },
                             color: Colors.white,
                             child: Container(

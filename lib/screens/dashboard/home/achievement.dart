@@ -44,7 +44,7 @@ class _BalanceHistoriesState extends State<Achievement> {
     return Scaffold(
       appBar: Wh.appBar(context, title: 'Achievement', center: true),
 
-      body: loading ? ListSkeleton(length: 15) : 
+      body: loading ? ListSkeleton(length: 15) : achivements.length == 0 ? Wh.noData(message: 'Tidak ada data') :
 
       RefreshIndicator(
         onRefresh: () async { getData(); },
