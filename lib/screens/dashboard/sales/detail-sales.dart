@@ -133,6 +133,8 @@ class _DetailSalesState extends State<DetailSales> {
                       padding: EdgeInsets.only(top: 15, bottom: 15, left: 15, right: 15),
                       onTap: (){
 
+                        // print(sales['timestamp']);
+
                         Modal.bottom(widget.ctx, child: Printer(print: (b){ print(b);
                           PrintSales(data: sales).run();
                         }), wrap: true);
@@ -217,13 +219,14 @@ class PrintSales {
 
   final data;
 
+
   run(){
     bluetooth.isConnected.then((isConnected) async{
       if(isConnected){
 
         var auth = await Auth.user();
 
-        List detail = data['details']; print(auth); print(data);
+        List detail = data['details']; //print(data['transaction_date']);
 
         bluetooth.printCustom(auth['name'],1,1);
         bluetooth.printCustom(auth['phone'],0,1);
@@ -232,7 +235,7 @@ class PrintSales {
         bluetooth.printCustom("------------------------------------------",0,1);
  
         bluetooth.printCustom('No. Invoice : '+data['code'].toString(),0,0);
-        bluetooth.printCustom('Tgl. '+data['transaction_date'],0,0);
+        bluetooth.printCustom('Tgl. '+data['timestamp']+', '+data['transaction_date'],0,0);
         bluetooth.printCustom('Kode Toko : '+data['store_code'].toString(),0,0);
         bluetooth.printCustom('Penjual : '+data['name'],0,0);
         bluetooth.printCustom("------------------------------------------",0,1);

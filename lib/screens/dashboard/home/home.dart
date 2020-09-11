@@ -130,7 +130,7 @@ class _HomeState extends State<Home> {
                           child: loading ? Wh.spiner() : Icon(Ln.wallet())
                         ),
 
-                        text(nformat(user['balance'] ?? 0), size: 20, bold: true)
+                        text(Cur.rupiah(user['balance'] ?? 0), size: 20, bold: true)
                       ],
                     ),
                     text('Jumlah saldo Anda saat ini', color: Colors.black38)

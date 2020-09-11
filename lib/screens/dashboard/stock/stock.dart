@@ -23,6 +23,8 @@ class _StockState extends State<Stock> {
   int totalValue = 0;
 
   getData() async{
+    qty = 0; pcs = 0; totalValue = 0;
+
     setState(() {
       loading = true;
     });

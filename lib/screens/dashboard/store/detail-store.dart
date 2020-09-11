@@ -40,6 +40,7 @@ class _DetailStoreState extends State<DetailStore> {
 
 
             return Container(
+              width: Mquery.width(context),
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
                 color: i % 2 == 0 ? TColor.silver() : Colors.white

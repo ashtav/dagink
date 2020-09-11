@@ -105,7 +105,7 @@ class _OthersState extends State<Others> {
                                     image: AssetImage('assets/img/profile.png')
                                   )
                                 ),
-                                child: user['avatar'] == null ? SizedBox.shrink() : FadeInImage.assetNetwork(
+                                child: user['avatar'] == 'default.png' ? SizedBox.shrink() : FadeInImage.assetNetwork(
                                   height: 50, width: 50,
                                   placeholder: 'assets/img/profile.png',
                                   image: 'https://daging-dev.bukakode.com/avatar/'+user['avatar'],

@@ -171,17 +171,24 @@ class _FormStoreState extends State<FormStore> {
     var locationEnabled = await Gps.enabled();
                               
     if(init) if(locationEnabled){
-      var location = await Gps.location();
+      requestPermissions(location: true, then: (allowed) async{
+        if(allowed){
 
-      setState(() {
+          var location = await Gps.location();
 
-        address.text = location.thoroughfare+', '+location.subLocality+', '+location.locality+' '+location.subAdministrativeArea+', '+location.administrativeArea+', '+location.postalCode;
-        zipCode.text = location.postalCode;
+          setState(() {
 
-        regency.text = location.subAdministrativeArea;
-        district.text = location.locality;
-        urban.text = location.subLocality;
+            address.text = location.thoroughfare+', '+location.subLocality+', '+location.locality+' '+location.subAdministrativeArea+', '+location.administrativeArea+', '+location.postalCode;
+            zipCode.text = location.postalCode;
 
+            regency.text = location.subAdministrativeArea;
+            district.text = location.locality;
+            urban.text = location.subLocality;
+
+          });
+        }else{
+          Wh.toast('Gps tidak tersedia');
+        }
       });
 
     }else{

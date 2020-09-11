@@ -31,6 +31,8 @@ class _SalesState extends State<Sales> {
 
   bool loading = true;
 
+  String tanggal = Dt.ymd;
+
   getData() async{
     setState(() {
       loading = true;
@@ -38,7 +40,7 @@ class _SalesState extends State<Sales> {
 
     String uid = await Auth.id();
 
-    Http.get('sales?created_by='+uid, then: (_, data){
+    Http.get('sales?created_by='+uid+'&start_date='+tanggal+'&end_date='+tanggal, then: (_, data){
       var res = decode(data)['data'];
       sales = res;
 
@@ -58,12 +60,15 @@ class _SalesState extends State<Sales> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Wh.appBar(context, title: 'Penjualan', back: widget.isBack, center: true, actions: [
-        // IconButton(
-        //   icon: Icon(Ln.refresh()),
-        //   onPressed: (){
-        //     getData();
-        //   },
-        // )
+        IconButton(
+          icon: Icon(Ln.calendar()),
+          onPressed: (){
+            Wh.datePicker(context, init: DateTime.parse(tanggal)).then((value){
+              tanggal = value;
+              getData();
+            });
+          },
+        )
       ]),
 
       body: loading ? ListSkeleton(length: 15) : sales.length == 0 ? Wh.noData(message: 'Tidak ada data penjualan') :
