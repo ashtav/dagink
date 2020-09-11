@@ -73,7 +73,7 @@ class _DetailPurchaseState extends State<DetailPurchase> {
               child: ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (BuildContext context, i){
-                  var data = items[i]; print(data);
+                  var data = items[i]; //print(data);
 
                   return WidSplash(
                     onTap: (){
@@ -102,7 +102,7 @@ class _DetailPurchaseState extends State<DetailPurchase> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               text(viewPrice == data['id'] ? '@'+nformat(data['price']) : nformat(data['subtotal_approve'])),
-                              text(data['qty_approve'].toString()+' / '+data['qty_pcs_approve'].toString())
+                              text(viewPrice == data['id'] ? '@'+nformat((data['price'] / data['volume']).round()) : data['qty_approve'].toString()+' / '+data['qty_pcs_approve'].toString())
                             ]
                           )
 
